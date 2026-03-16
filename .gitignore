@@ -7,4 +7,3 @@ __pycache__/
 articles/
 *.json
 node_modules/
-**/node_modules/
