@@ -1,66 +1,79 @@
 <view class="page">
-	<!-- 顶部统计摘要 -->
-	<view class="stats-header anim-fade-in">
-		<scroll-view class="stats-scroll" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
-			<view class="stats-row">
-				<view class="stat-card {{currentTab === 'all' ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="all">
-					<text class="stat-val">{{stats.total}}</text>
-					<text class="stat-lbl">采购总量</text>
+	<!-- 固定顶部：统计卡片 + 筛选条件 -->
+	<view class="page-header">
+		<!-- 顶部统计摘要 -->
+		<view class="stats-header anim-fade-in">
+			<scroll-view class="stats-scroll" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
+				<view class="stats-row">
+					<view class="stat-card {{currentTab === 'all' ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="all">
+						<text class="stat-val">{{stats.total}}</text>
+						<text class="stat-lbl">采购总量</text>
+					</view>
+					<view class="stat-card stat-card-accent {{currentTab === 'today' ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="today">
+						<text class="stat-val">{{stats.todayNew}}</text>
+						<text class="stat-lbl">今日新增</text>
+					</view>
+				<view wx:for="{{stats.catCounts}}" wx:key="name" class="stat-card {{item.colorClass}} {{currentTab === 'cat:' + item.name ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="cat:{{item.name}}">
+					<text class="stat-val">{{item.count}}</text>
+					<text class="stat-lbl">{{item.name}}</text>
 				</view>
-				<view class="stat-card stat-card-accent {{currentTab === 'today' ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="today">
-					<text class="stat-val">{{stats.todayNew}}</text>
-					<text class="stat-lbl">今日新增</text>
 				</view>
-			<view wx:for="{{stats.catCounts}}" wx:key="name" class="stat-card {{item.colorClass}} {{currentTab === 'cat:' + item.name ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="cat:{{item.name}}">
-				<text class="stat-val">{{item.count}}</text>
-				<text class="stat-lbl">{{item.name}}</text>
+			</scroll-view>
+		</view>
+
+		<!-- 筛选栏 -->
+		<view class="filter-section anim-fade-up anim-d1">
+			<scroll-view class="filter-tabs-scroll" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
+				<view class="filter-tabs">
+					<view class="ftab {{currentTab === 'all' ? 'ftab-on' : ''}}" bindtap="onTabChange" data-tab="all">
+						<text>全部</text>
+					</view>
+					<view wx:for="{{followedCats}}" wx:key="*this" class="ftab {{currentTab === 'cat:' + item ? 'ftab-on' : ''}}" bindtap="onTabChange" data-tab="cat:{{item}}">
+						<text>{{item}}</text>
+					</view>
+					<view class="ftab {{currentTab === 'today' ? 'ftab-on' : ''}}" bindtap="onTabChange" data-tab="today">
+						<text>今日新增</text>
+					</view>
+				</view>
+			</scroll-view>
+			<view class="filter-more-btn" bindtap="goToFilter">
+				<view class="filter-icon-bar"></view>
+				<view class="filter-icon-bar short"></view>
+				<view class="filter-icon-bar"></view>
+				<text class="filter-more-txt">筛选</text>
 			</view>
+		</view>
+
+		<!-- 来源快捷栏 -->
+		<scroll-view class="source-scroll anim-fade-up anim-d2" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
+			<view class="source-inner">
+				<view class="src-chip {{currentSource === '' ? 'src-on' : ''}}" bindtap="onSourceChange" data-source="">
+					<text>全部来源</text>
+				</view>
+				<view
+					wx:for="{{sourceList}}"
+					wx:key="id"
+					class="src-chip {{currentSource === item.id ? 'src-on' : ''}}"
+					bindtap="onSourceChange"
+					data-source="{{item.id}}"
+				>
+					<text>{{item.name}}</text>
+				</view>
 			</view>
 		</scroll-view>
 	</view>
 
-	<!-- 筛选栏 -->
-	<view class="filter-section anim-fade-up anim-d1">
-		<scroll-view class="filter-tabs-scroll" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
-			<view class="filter-tabs">
-				<view class="ftab {{currentTab === 'all' ? 'ftab-on' : ''}}" bindtap="onTabChange" data-tab="all">
-					<text>全部</text>
-				</view>
-				<view wx:for="{{followedCats}}" wx:key="*this" class="ftab {{currentTab === 'cat:' + item ? 'ftab-on' : ''}}" bindtap="onTabChange" data-tab="cat:{{item}}">
-					<text>{{item}}</text>
-				</view>
-				<view class="ftab {{currentTab === 'today' ? 'ftab-on' : ''}}" bindtap="onTabChange" data-tab="today">
-					<text>今日新增</text>
-				</view>
-			</view>
-		</scroll-view>
-		<view class="filter-more-btn" bindtap="goToFilter">
-			<view class="filter-icon-bar"></view>
-			<view class="filter-icon-bar short"></view>
-			<view class="filter-icon-bar"></view>
-			<text class="filter-more-txt">筛选</text>
-		</view>
-	</view>
-
-	<!-- 来源快捷栏 -->
-	<scroll-view class="source-scroll anim-fade-up anim-d2" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
-		<view class="source-inner">
-			<view class="src-chip {{currentSource === '' ? 'src-on' : ''}}" bindtap="onSourceChange" data-source="">
-				<text>全部来源</text>
-			</view>
-			<view
-				wx:for="{{sourceList}}"
-				wx:key="id"
-				class="src-chip {{currentSource === item.id ? 'src-on' : ''}}"
-				bindtap="onSourceChange"
-				data-source="{{item.id}}"
-			>
-				<text>{{item.name}}</text>
-			</view>
-		</view>
-	</scroll-view>
-
-	<!-- 列表区域 -->
+	<!-- 可滚动列表区域 -->
+	<scroll-view
+		class="list-scroll"
+		scroll-y="{{true}}"
+		enhanced="{{true}}"
+		show-scrollbar="{{false}}"
+		bindscrolltolower="onScrollToLower"
+		refresher-enabled="{{true}}"
+		refresher-triggered="{{refreshing}}"
+		bindrefresherrefresh="onRefresherRefresh"
+	>
 	<view class="list-wrap">
 		<!-- 骨架屏加载态 -->
 		<block wx:if="{{showSkeleton}}">
@@ -113,7 +126,7 @@
 			</view>
 			<text class="empty-title">暂无采购信息</text>
 			<text class="empty-desc">数据将在下次抓取时自动更新\n下拉页面可手动刷新</text>
-			<view class="empty-action" bindtap="onPullDownRefresh">
+			<view class="empty-action" bindtap="onRefresherRefresh">
 				<text>立即刷新</text>
 			</view>
 		</view>
@@ -125,4 +138,5 @@
 			<view class="list-end-line"></view>
 		</view>
 	</view>
+	</scroll-view>
 </view>

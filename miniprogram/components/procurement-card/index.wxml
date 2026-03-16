@@ -4,8 +4,8 @@
 			<view wx:if="{{item.isNew}}" class="pc-tag pc-tag-new">
 				<text>NEW</text>
 			</view>
-			<view wx:if="{{item.isChemical && followedCats.length > 0}}" class="pc-tag pc-tag-chem">
-				<text>{{followedCats[0]}}</text>
+			<view wx:if="{{item.isChemical && primaryCat}}" class="pc-tag pc-tag-chem pc-tag-chem-c{{primaryCatColorIndex}}">
+				<text>{{primaryCat}}</text>
 			</view>
 			<view class="pc-tag pc-tag-src">
 				<text>{{item.sourceName}}</text>

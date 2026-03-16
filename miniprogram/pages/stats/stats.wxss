@@ -34,6 +34,15 @@
 .st-val-red { color: #DC2626; }
 .st-val-amber { color: #D97706; }
 .st-val-green { color: #059669; }
+/* 各类别数值颜色 */
+.st-val-c0 { color: #DC2626; }
+.st-val-c1 { color: #059669; }
+.st-val-c2 { color: #2563EB; }
+.st-val-c3 { color: #7C3AED; }
+.st-val-c4 { color: #D97706; }
+.st-val-c5 { color: #F59E0B; }
+.st-val-c6 { color: #0891B2; }
+.st-val-c7 { color: #DB2777; }
 
 .st-mc-lbl {
 	font-size: 22rpx;
@@ -55,6 +64,15 @@
 .st-mc-bar-red { background: linear-gradient(90deg, #DC2626, #F87171); }
 .st-mc-bar-amber { background: linear-gradient(90deg, #D97706, #FBBF24); }
 .st-mc-bar-green { background: linear-gradient(90deg, #059669, #34D399); }
+/* 各类别底部条颜色 */
+.st-mc-bar-c0 { background: linear-gradient(90deg, #DC2626, #F87171); }
+.st-mc-bar-c1 { background: linear-gradient(90deg, #059669, #34D399); }
+.st-mc-bar-c2 { background: linear-gradient(90deg, #2563EB, #60A5FA); }
+.st-mc-bar-c3 { background: linear-gradient(90deg, #7C3AED, #A78BFA); }
+.st-mc-bar-c4 { background: linear-gradient(90deg, #D97706, #FBBF24); }
+.st-mc-bar-c5 { background: linear-gradient(90deg, #F59E0B, #FCD34D); }
+.st-mc-bar-c6 { background: linear-gradient(90deg, #0891B2, #22D3EE); }
+.st-mc-bar-c7 { background: linear-gradient(90deg, #DB2777, #F472B6); }
 
 /* ==================== 通用区块 ==================== */
 
@@ -165,6 +183,15 @@
 
 .st-ld-blue { background: #2563EB; }
 .st-ld-red { background: #DC2626; }
+/* 各类别图例点颜色 */
+.st-ld-c0 { background: #DC2626; }
+.st-ld-c1 { background: #059669; }
+.st-ld-c2 { background: #2563EB; }
+.st-ld-c3 { background: #7C3AED; }
+.st-ld-c4 { background: #D97706; }
+.st-ld-c5 { background: #F59E0B; }
+.st-ld-c6 { background: #0891B2; }
+.st-ld-c7 { background: #DB2777; }
 
 /* ==================== 化学仪器占比 ==================== */
 
@@ -196,7 +223,6 @@
 
 .st-ratio-bar {
 	height: 16rpx;
-	background: #FEE2E2;
 	border-radius: 8rpx;
 	overflow: hidden;
 	margin: 0 40rpx;
@@ -204,11 +230,36 @@
 
 .st-ratio-bar-fill {
 	height: 100%;
-	background: linear-gradient(90deg, #DC2626, #EF4444, #F87171);
 	border-radius: 8rpx;
 	transition: width 0.8s ease;
 	min-width: 4rpx;
 }
+
+/* 各类别占比卡片颜色 */
+.st-ratio-card-c0 .st-ratio-num, .st-ratio-card-c0 .st-ratio-pct { color: #DC2626; }
+.st-ratio-card-c0 .st-ratio-bar { background: #FEE2E2; }
+.st-ratio-card-c0 .st-ratio-bar-fill { background: linear-gradient(90deg, #DC2626, #F87171); }
+.st-ratio-card-c1 .st-ratio-num, .st-ratio-card-c1 .st-ratio-pct { color: #059669; }
+.st-ratio-card-c1 .st-ratio-bar { background: #D1FAE5; }
+.st-ratio-card-c1 .st-ratio-bar-fill { background: linear-gradient(90deg, #059669, #34D399); }
+.st-ratio-card-c2 .st-ratio-num, .st-ratio-card-c2 .st-ratio-pct { color: #2563EB; }
+.st-ratio-card-c2 .st-ratio-bar { background: #DBEAFE; }
+.st-ratio-card-c2 .st-ratio-bar-fill { background: linear-gradient(90deg, #2563EB, #60A5FA); }
+.st-ratio-card-c3 .st-ratio-num, .st-ratio-card-c3 .st-ratio-pct { color: #7C3AED; }
+.st-ratio-card-c3 .st-ratio-bar { background: #EDE9FE; }
+.st-ratio-card-c3 .st-ratio-bar-fill { background: linear-gradient(90deg, #7C3AED, #A78BFA); }
+.st-ratio-card-c4 .st-ratio-num, .st-ratio-card-c4 .st-ratio-pct { color: #D97706; }
+.st-ratio-card-c4 .st-ratio-bar { background: #FFEDD5; }
+.st-ratio-card-c4 .st-ratio-bar-fill { background: linear-gradient(90deg, #D97706, #FBBF24); }
+.st-ratio-card-c5 .st-ratio-num, .st-ratio-card-c5 .st-ratio-pct { color: #F59E0B; }
+.st-ratio-card-c5 .st-ratio-bar { background: #FEF3C7; }
+.st-ratio-card-c5 .st-ratio-bar-fill { background: linear-gradient(90deg, #F59E0B, #FCD34D); }
+.st-ratio-card-c6 .st-ratio-num, .st-ratio-card-c6 .st-ratio-pct { color: #0891B2; }
+.st-ratio-card-c6 .st-ratio-bar { background: #CFFAFE; }
+.st-ratio-card-c6 .st-ratio-bar-fill { background: linear-gradient(90deg, #0891B2, #22D3EE); }
+.st-ratio-card-c7 .st-ratio-num, .st-ratio-card-c7 .st-ratio-pct { color: #DB2777; }
+.st-ratio-card-c7 .st-ratio-bar { background: #FCE7F3; }
+.st-ratio-card-c7 .st-ratio-bar-fill { background: linear-gradient(90deg, #DB2777, #F472B6); }
 
 .st-ratio-meta {
 	display: flex;

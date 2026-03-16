@@ -117,10 +117,17 @@ Page({
 				}
 				return s;
 			});
+			// 云端成功时同步到本地，保持一致
+			var enabled = sources.filter(function(s) { return s.enabled; }).map(function(s) { return { id: s.id, name: s.name }; });
+			config.setDisplaySources(enabled);
 			self.setData({ sources: sources, sourcesLoaded: true });
 		}).catch(function() {
+			// 云失败时优先用本地 display_sources，避免重启后丢失用户设置
+			var local = config.getDisplaySources();
 			var sources = builtIn.map(function(src) {
-				return JSON.parse(JSON.stringify(src));
+				var s = JSON.parse(JSON.stringify(src));
+				s.enabled = local.some(function(x) { return x.id === s.id; });
+				return s;
 			});
 			self.setData({ sources: sources, sourcesLoaded: true });
 		});
@@ -161,7 +168,7 @@ Page({
 		});
 	},
 
-	/* ========== 设备关键字 ========== */
+	/* ========== 抓取关键字 ========== */
 
 	loadKeywords: function() {
 		var self = this;
@@ -169,36 +176,39 @@ Page({
 			var cats = (data && typeof data === "object") ? data : {};
 			var keys = Object.keys(cats);
 
-			// 检测是否为旧的分层格式（每个 key 的 value 应只含自身一个词）
-			// 旧格式示例：{"色谱类": ["色谱", "液相色谱", ...]}
-			// 新格式示例：{"耗材": ["耗材"]}
-			var isOldFormat = false;
+			var isValidFormat = true;
 			for (var i = 0; i < keys.length; i++) {
 				var words = cats[keys[i]];
 				if (!Array.isArray(words) || words.length !== 1 || words[0] !== keys[i]) {
-					isOldFormat = true;
+					isValidFormat = false;
 					break;
 				}
 			}
 
 			var keywords;
-			if (keys.length === 0 || isOldFormat) {
-				// 无数据或旧格式，重置为默认并静默写入云端
+			if (keys.length === 0 || !isValidFormat) {
 				keywords = config.getDefaultKeywords();
 				var resetCats = {};
 				for (var j = 0; j < keywords.length; j++) {
 					resetCats[keywords[j]] = [keywords[j]];
 				}
+				config.setKeywords(keywords);
 				api.saveCustomKeywords(resetCats).catch(function() {});
 				api.saveFollowedCategories(keywords).catch(function() {});
 			} else {
 				keywords = keys;
+				config.setKeywords(keywords);
 			}
 
 			self._applyKeywords(keywords);
 		}).catch(function(err) {
-			console.error("加载设备关键字失败:", err);
-			self._applyKeywords(config.getDefaultKeywords());
+			console.error("加载抓取关键字失败:", err);
+			var keywords = config.getKeywords();
+			if (!keywords || keywords.length === 0) {
+				keywords = config.getDefaultKeywords();
+				config.setKeywords(keywords);
+			}
+			self._applyKeywords(keywords);
 		});
 	},
 
@@ -268,10 +278,13 @@ Page({
 			cats[keywords[i]] = [keywords[i]];
 		}
 		self._applyKeywords(keywords);
-		api.saveFollowedCategories(keywords).catch(function(err) {
-			console.error("保存关注分类失败:", err);
-		});
-		api.saveCustomKeywords(cats).then(function() {
+		// 立即写本地缓存，重启后云请求慢/失败时仍能恢复
+		config.setKeywords(keywords);
+		// 同时保存 custom_keywords 和 followed_categories，确保云端一致
+		Promise.all([
+			api.saveCustomKeywords(cats),
+			api.saveFollowedCategories(keywords)
+		]).then(function() {
 			util.showToast("已保存", "success");
 		}).catch(function(err) {
 			util.showToast("保存失败");
@@ -284,11 +297,13 @@ Page({
 	loadBlacklist: function() {
 		var self = this;
 		api.getBlacklistKeywords().then(function(data) {
-			var list = (data && Array.isArray(data)) ? data : [];
+			var list = (data && Array.isArray(data) && data.length > 0) ? data : config.getDefaultBlacklist();
+			config.setBlacklist(list);
 			self.setData({ blacklist: list, blacklistLoaded: true });
 		}).catch(function(err) {
 			console.error("加载黑名单失败:", err);
-			self.setData({ blacklist: [], blacklistLoaded: true });
+			var list = config.getBlacklist() || config.getDefaultBlacklist();
+			self.setData({ blacklist: list, blacklistLoaded: true });
 		});
 	},
 
@@ -333,6 +348,7 @@ Page({
 	saveBlacklist: function(blacklist) {
 		var self = this;
 		self.setData({ blacklist: blacklist });
+		config.setBlacklist(blacklist);
 		api.saveBlacklistKeywords(blacklist).then(function() {
 			util.showToast("已保存", "success");
 		}).catch(function(err) {
@@ -347,6 +363,7 @@ Page({
 		var self = this;
 		api.getSchedule().then(function(data) {
 			if (data && typeof data === "object") {
+				config.setSchedule(data);
 				var dayMap = { "all": 0, "workday": 1, "weekend": 2 };
 				var dayIdx = (dayMap[data.dayType] !== undefined) ? dayMap[data.dayType] : 0;
 				self.setData({
@@ -359,7 +376,18 @@ Page({
 			}
 		}).catch(function(err) {
 			console.error("加载抓取策略失败:", err);
-			self.setData({ scheduleLoaded: true });
+			var data = config.getSchedule();
+			if (data && typeof data === "object") {
+				var dayMap = { "all": 0, "workday": 1, "weekend": 2 };
+				var dayIdx = (dayMap[data.dayType] !== undefined) ? dayMap[data.dayType] : 0;
+				self.setData({
+					schedule: data,
+					scheduleLoaded: true,
+					dayTypeIndex: dayIdx
+				});
+			} else {
+				self.setData({ scheduleLoaded: true });
+			}
 		});
 	},
 
@@ -379,7 +407,9 @@ Page({
 	},
 
 	saveSchedule: function() {
-		api.saveSchedule(this.data.schedule).then(function() {
+		var schedule = this.data.schedule;
+		config.setSchedule(schedule);
+		api.saveSchedule(schedule).then(function() {
 			util.showToast("策略已保存", "success");
 		}).catch(function(err) {
 			util.showToast("保存失败");

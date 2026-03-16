@@ -29,9 +29,9 @@
 				<view class="st-mc-bar st-mc-bar-amber"></view>
 			</view>
 			<view wx:for="{{catRatios}}" wx:key="name" class="st-mc anim-scale-in anim-d2">
-				<text class="st-mc-val st-val-red">{{item.count}}</text>
+				<text class="st-mc-val st-val-c{{item.colorIndex}}">{{item.count}}</text>
 				<text class="st-mc-lbl">{{item.name}}</text>
-				<view class="st-mc-bar st-mc-bar-red"></view>
+				<view class="st-mc-bar st-mc-bar-c{{item.colorIndex}}"></view>
 			</view>
 		</view>
 
@@ -54,9 +54,9 @@
 					<view class="st-legend-dot st-ld-blue"></view>
 					<text>全部</text>
 				</view>
-				<view wx:for="{{followedCats}}" wx:key="*this" class="st-legend-item">
-					<view class="st-legend-dot st-ld-red"></view>
-					<text>{{item}}</text>
+				<view wx:for="{{legendItems}}" wx:key="name" class="st-legend-item">
+					<view class="st-legend-dot st-ld-c{{item.colorIndex}}"></view>
+					<text>{{item.name}}</text>
 				</view>
 			</view>
 		</view>
@@ -64,7 +64,7 @@
 		<!-- 关注分类占比 -->
 		<view wx:for="{{catRatios}}" wx:key="name" class="st-section anim-fade-up anim-d1">
 			<text class="st-sec-title">{{item.name}}占比</text>
-			<view class="st-ratio-card">
+			<view class="st-ratio-card st-ratio-card-c{{item.colorIndex}}">
 				<view class="st-ratio-main">
 					<text class="st-ratio-num">{{item.percent}}</text>
 					<text class="st-ratio-pct">%</text>

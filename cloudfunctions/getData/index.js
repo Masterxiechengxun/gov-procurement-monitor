@@ -20,16 +20,8 @@ var DEFAULT_SOURCES = [
 	}
 ];
 
-var DEFAULT_KEYWORDS = {
-	"色谱类": ["液相色谱", "气相色谱", "离子色谱", "高效液相", "HPLC", "GC", "超高效液相", "薄层色谱", "UHPLC", "IC"],
-	"光谱类": ["原子吸收", "原子荧光", "红外光谱", "紫外光谱", "拉曼光谱", "ICP", "分光光度计", "ICP-OES", "ICP-MS", "AAS", "AFS", "紫外可见"],
-	"质谱类": ["质谱仪", "色谱质谱", "气质联用", "液质联用", "GCMS", "LCMS", "三重四极杆", "飞行时间", "TOF"],
-	"通用设备": ["天平", "pH计", "电导率仪", "离心机", "恒温箱", "干燥箱", "马弗炉", "水浴锅", "培养箱"],
-	"前处理": ["移液器", "滴定仪", "旋转蒸发", "消解仪", "萃取仪", "纯水机", "氮吹仪", "超纯水"],
-	"综合类": ["分析仪器", "化学仪器", "实验室设备", "检测仪器", "实验仪器", "检验设备"],
-	"高端仪器": ["电子显微镜", "X射线", "XRD", "XRF", "DSC", "TGA", "元素分析", "电化学工作站"],
-	"耗材试剂": ["试剂", "标准品", "标准物质", "色谱柱"]
-};
+var DEFAULT_KEYWORDS = { "耗材": ["耗材"] };
+var DEFAULT_BLACKLIST = ["医院"];
 
 var DEFAULT_SCHEDULE = {
 	enabled: true,
@@ -90,6 +82,7 @@ function handleList(event, context, openid) {
 
 	return getConfigValue("blacklist_keywords", openid)
 		.then(function(blacklist) {
+			blacklist = (blacklist && Array.isArray(blacklist) && blacklist.length > 0) ? blacklist : DEFAULT_BLACKLIST;
 			var where = buildWhere(event, blacklist);
 
 			var countPromise = db.collection("procurements")
@@ -165,7 +158,7 @@ function handleDetail(event, context, openid) {
 		getConfigValue("blacklist_keywords", openid),
 		db.collection("procurements").doc(id).get()
 	]).then(function(results) {
-		var blacklist = results[0] || [];
+		var blacklist = (results[0] && Array.isArray(results[0]) && results[0].length > 0) ? results[0] : DEFAULT_BLACKLIST;
 		var res = results[1];
 		var data = res.data;
 		if (!data) {
@@ -194,7 +187,7 @@ function handleStats(event, context, openid) {
 
 	return Promise.all([blacklistPromise, followedPromise, keywordsPromise])
 		.then(function(preResults) {
-			var blacklist = preResults[0] || [];
+			var blacklist = (preResults[0] && Array.isArray(preResults[0]) && preResults[0].length > 0) ? preResults[0] : DEFAULT_BLACKLIST;
 			var followedCats = preResults[1] || [];
 			var keywordsCfg = preResults[2] || DEFAULT_KEYWORDS;
 
@@ -380,9 +373,10 @@ function handleSaveSources(event, context, openid) {
 function handleGetKeywords(event, context, openid) {
 	return getConfigValue("custom_keywords", openid)
 		.then(function(val) {
+			// 无数据时返回 null，让前端用本地缓存或默认值，避免返回 DEFAULT_KEYWORDS 旧格式导致前端误判并覆盖
 			return {
 				code: 0,
-				data: val || DEFAULT_KEYWORDS
+				data: val || null
 			};
 		})
 		.catch(function(err) {
@@ -397,7 +391,7 @@ function handleSaveKeywords(event, context, openid) {
 	}
 	return setConfigValue("custom_keywords", keywords, openid)
 		.then(function() {
-			return { code: 0, message: "设备关键字保存成功", data: null };
+			return { code: 0, message: "抓取关键字保存成功", data: null };
 		})
 		.catch(function(err) {
 			return { code: -1, message: err.message, data: null };
@@ -406,13 +400,13 @@ function handleSaveKeywords(event, context, openid) {
 
 function handleGetBlacklistKeywords(event, context, openid) {
 	if (!openid) {
-		return Promise.resolve({ code: 0, data: [] });
+		return Promise.resolve({ code: 0, data: DEFAULT_BLACKLIST.slice() });
 	}
 	return getConfigValue("blacklist_keywords", openid)
 		.then(function(val) {
 			return {
 				code: 0,
-				data: val || []
+				data: (val && Array.isArray(val) && val.length > 0) ? val : DEFAULT_BLACKLIST.slice()
 			};
 		})
 		.catch(function(err) {
@@ -568,7 +562,7 @@ function handleAnalytics(event, context, openid) {
 
 	return getConfigValue("blacklist_keywords", openid)
 		.then(function(blacklist) {
-			blacklist = blacklist || [];
+			blacklist = (blacklist && Array.isArray(blacklist) && blacklist.length > 0) ? blacklist : DEFAULT_BLACKLIST;
 			var dailyPromises = [];
 			for (var di = 0; di < dates.length; di++) {
 				dailyPromises.push(countByDate(dates[di], blacklist));

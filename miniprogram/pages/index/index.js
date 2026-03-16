@@ -8,6 +8,7 @@ Page({
 		loading: false,
 		showSkeleton: true,
 		noMore: false,
+		refreshing: false,
 		page: 1,
 		pageSize: 20,
 		currentTab: "all",
@@ -77,17 +78,18 @@ Page({
 		}).catch(function() {});
 	},
 
-	onPullDownRefresh: function() {
+	onRefresherRefresh: function() {
 		var self = this;
+		self.setData({ refreshing: true });
 		self.loadStats();
 		self.loadList(true).then(function() {
-			wx.stopPullDownRefresh();
+			self.setData({ refreshing: false });
 		}).catch(function() {
-			wx.stopPullDownRefresh();
+			self.setData({ refreshing: false });
 		});
 	},
 
-	onReachBottom: function() {
+	onScrollToLower: function() {
 		if (!this.data.loading && !this.data.noMore) {
 			this.loadList(false);
 		}
@@ -95,11 +97,7 @@ Page({
 
 	loadStats: function() {
 		var self = this;
-		var catColors = [
-			"stat-card-danger", "stat-card-success",
-			"stat-card-info", "stat-card-purple",
-			"stat-card-orange", "stat-card-accent"
-		];
+		var config = require("../../utils/config");
 		api.getStats().then(function(data) {
 			var cats = self.data.followedCats;
 			var serverCatCounts = data.catCounts || {};
@@ -108,7 +106,7 @@ Page({
 				catCounts.push({
 					name: cats[i],
 					count: serverCatCounts[cats[i]] || 0,
-					colorClass: catColors[i % catColors.length]
+					colorClass: "stat-card-" + config.getCategoryColorKey(i)
 				});
 			}
 			self.setData({

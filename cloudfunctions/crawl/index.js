@@ -173,7 +173,7 @@ function aggregateSources(userMap) {
 }
 
 /**
- * 合并所有用户的设备关键字，用于：
+ * 合并所有用户的抓取关键字，用于：
  * 1. 存库时给采购信息打标签（isChemical / matchedKeywords），方便前端快速过滤
  * 2. 推送前预筛选——只有命中任一用户关键字的条目才进入推送候选
  * 注意：这里不影响抓取范围，抓取本身是全量的。
@@ -569,20 +569,21 @@ function sendErrorNotifications(results, userMap) {
 	return notifyNext(0);
 }
 
+var DEFAULT_BLACKLIST = ["医院"];
+
 /**
  * 按黑名单过滤条目，排除标题包含黑名单关键字的采购信息。
+ * 黑名单为空时使用默认 ["医院"]。
  */
 function filterItemsByBlacklist(items, blacklist) {
-	if (!blacklist || !Array.isArray(blacklist) || blacklist.length === 0) {
-		return items;
-	}
+	var list = (blacklist && Array.isArray(blacklist) && blacklist.length > 0) ? blacklist : DEFAULT_BLACKLIST;
 	var filtered = [];
 	var titleLower;
 	for (var i = 0; i < items.length; i++) {
 		titleLower = (items[i].title || "").toLowerCase();
 		var hit = false;
-		for (var j = 0; j < blacklist.length; j++) {
-			if (titleLower.indexOf(String(blacklist[j]).toLowerCase()) !== -1) {
+		for (var j = 0; j < list.length; j++) {
+			if (titleLower.indexOf(String(list[j]).toLowerCase()) !== -1) {
 				hit = true;
 				break;
 			}

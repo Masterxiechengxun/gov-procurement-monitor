@@ -33,7 +33,7 @@ function buildHtmlMessage(items) {
 
 		if (item.matchedKeywords && item.matchedKeywords.length > 0) {
 			lines.push("<p style=\"color:#FF3B30;font-size:12px;\">");
-			lines.push("匹配设备关键字: " + item.matchedKeywords.join(", "));
+			lines.push("匹配抓取关键字: " + item.matchedKeywords.join(", "));
 			lines.push("</p>");
 		}
 

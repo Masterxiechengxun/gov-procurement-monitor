@@ -30,7 +30,7 @@
 		</view>
 	</view>
 
-	<!-- 设备关键字 -->
+	<!-- 抓取关键字 -->
 	<view class="se-card anim-fade-up anim-d1">
 		<view class="se-card-head">
 			<view class="se-icon-wrap se-icon-keyword">
@@ -42,13 +42,13 @@
 				</view>
 			</view>
 			<view>
-				<text class="se-card-title">设备关键字</text>
+				<text class="se-card-title">抓取关键字</text>
 				<text class="se-card-desc">每个关键字对应一个筛选分类</text>
 			</view>
 		</view>
 
 		<view class="se-kw-chips">
-			<view wx:for="{{keywords}}" wx:key="*this" class="se-kw-chip">
+			<view wx:for="{{keywords}}" wx:key="*this" class="se-kw-chip se-kw-chip-c{{index % 8}}">
 				<text>{{item}}</text>
 				<text class="se-kw-chip-del" catchtap="deleteWord" data-word="{{item}}">×</text>
 			</view>
@@ -112,7 +112,7 @@
 			</view>
 			<view>
 				<text class="se-card-title">自动抓取</text>
-				<text class="se-card-desc">每天定时抓取，可设置运行日期</text>
+				<text class="se-card-desc">每天 06:00 定时执行，周期为每日。可设置限定运行日期（每天/仅工作日/仅周末）</text>
 			</view>
 		</view>
 
@@ -121,14 +121,14 @@
 			<switch checked="{{schedule.enabled}}" bindchange="toggleScheduleEnabled" color="#2563EB" />
 		</view>
 		<view class="se-row se-row-last {{!schedule.enabled ? 'se-row-dim' : ''}}">
-			<text class="se-row-label">运行日期</text>
+			<text class="se-row-label">限定运行日期</text>
 			<picker range="{{dayTypeOptions}}" value="{{dayTypeIndex}}" bindchange="onDayTypeChange" disabled="{{!schedule.enabled}}">
 				<view class="se-picker {{!schedule.enabled ? 'se-picker-dim' : ''}}">{{dayTypeOptions[dayTypeIndex]}}</view>
 			</picker>
 		</view>
 
 		<view class="se-schedule-summary {{schedule.enabled ? 'se-schedule-summary-on' : ''}}">
-			<text wx:if="{{schedule.enabled}}">{{dayTypeOptions[dayTypeIndex]}}自动运行</text>
+			<text wx:if="{{schedule.enabled}}">每天 06:00 定时执行，{{dayTypeOptions[dayTypeIndex]}}运行</text>
 			<text wx:else>已暂停，仅支持手动触发</text>
 		</view>
 	</view>

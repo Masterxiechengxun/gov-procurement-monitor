@@ -1,5 +1,8 @@
 var STORAGE_KEY_SOURCES = "display_sources";
 var STORAGE_KEY_FOLLOWED = "followed_categories";
+var STORAGE_KEY_KEYWORDS = "custom_keywords";
+var STORAGE_KEY_BLACKLIST = "blacklist_keywords";
+var STORAGE_KEY_SCHEDULE = "crawl_schedule";
 
 var DEFAULT_SOURCE = {
 	id: "ccgp",
@@ -14,6 +17,10 @@ var DEFAULT_DISPLAY_SOURCES = [
 var DEFAULT_FOLLOWED = ["耗材"];
 var DEFAULT_KEYWORD_CATEGORY = "耗材";
 var DEFAULT_KEYWORDS = ["耗材"];
+var DEFAULT_BLACKLIST = ["医院"];
+
+// 类别颜色配置：各页面按 index % 长度 取色，保证同一类别在各处颜色一致
+var CATEGORY_COLOR_KEYS = ["danger", "success", "info", "purple", "orange", "accent", "teal", "pink"];
 
 var config = {
 	bidTypes: {
@@ -72,6 +79,82 @@ var config = {
 		}
 	},
 
+	getKeywords: function() {
+		try {
+			var cached = wx.getStorageSync(STORAGE_KEY_KEYWORDS);
+			if (cached && Array.isArray(cached) && cached.length > 0) {
+				return cached;
+			}
+		} catch (e) {
+			console.error("读取关键字缓存失败:", e);
+		}
+		return null;
+	},
+
+	setKeywords: function(keywords) {
+		try {
+			if (keywords && Array.isArray(keywords) && keywords.length > 0) {
+				wx.setStorageSync(STORAGE_KEY_KEYWORDS, keywords);
+			} else {
+				wx.removeStorageSync(STORAGE_KEY_KEYWORDS);
+			}
+		} catch (e) {
+			console.error("保存关键字缓存失败:", e);
+		}
+	},
+
+	getBlacklist: function() {
+		try {
+			var cached = wx.getStorageSync(STORAGE_KEY_BLACKLIST);
+			if (cached && Array.isArray(cached)) {
+				return cached;
+			}
+		} catch (e) {
+			console.error("读取黑名单缓存失败:", e);
+		}
+		return null;
+	},
+
+	getDefaultBlacklist: function() {
+		return DEFAULT_BLACKLIST.slice();
+	},
+
+	setBlacklist: function(list) {
+		try {
+			if (list && Array.isArray(list)) {
+				wx.setStorageSync(STORAGE_KEY_BLACKLIST, list);
+			} else {
+				wx.removeStorageSync(STORAGE_KEY_BLACKLIST);
+			}
+		} catch (e) {
+			console.error("保存黑名单缓存失败:", e);
+		}
+	},
+
+	getSchedule: function() {
+		try {
+			var cached = wx.getStorageSync(STORAGE_KEY_SCHEDULE);
+			if (cached && typeof cached === "object" && cached !== null) {
+				return cached;
+			}
+		} catch (e) {
+			console.error("读取抓取策略缓存失败:", e);
+		}
+		return null;
+	},
+
+	setSchedule: function(schedule) {
+		try {
+			if (schedule && typeof schedule === "object") {
+				wx.setStorageSync(STORAGE_KEY_SCHEDULE, schedule);
+			} else {
+				wx.removeStorageSync(STORAGE_KEY_SCHEDULE);
+			}
+		} catch (e) {
+			console.error("保存抓取策略缓存失败:", e);
+		}
+	},
+
 	getDefaultSource: function() {
 		return JSON.parse(JSON.stringify(DEFAULT_SOURCE));
 	},
@@ -86,6 +169,15 @@ var config = {
 
 	getDefaultKeywords: function() {
 		return DEFAULT_KEYWORDS.slice();
+	},
+
+	/**
+	 * 根据类别在列表中的索引获取颜色 key，用于各页面统一样式
+	 * @param {number} index 类别在 followedCats/keywords 中的索引
+	 * @returns {string} 颜色 key，如 'danger'、'success'
+	 */
+	getCategoryColorKey: function(index) {
+		return CATEGORY_COLOR_KEYS[index % CATEGORY_COLOR_KEYS.length];
 	}
 };
 

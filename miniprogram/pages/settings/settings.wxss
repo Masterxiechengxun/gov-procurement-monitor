@@ -689,16 +689,31 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 6rpx;
-	background: #FEF2F2;
-	border: 1rpx solid #FECACA;
 	border-radius: 6rpx;
 	padding: 6rpx 10rpx 6rpx 14rpx;
 }
 
 .se-kw-chip text {
 	font-size: 22rpx;
-	color: #991B1B;
 }
+
+/* 各类别关键字芯片颜色 */
+.se-kw-chip-c0 { background: #FEE2E2; border: 1rpx solid #FECACA; }
+.se-kw-chip-c0 text:first-of-type { color: #991B1B; }
+.se-kw-chip-c1 { background: #DCFCE7; border: 1rpx solid #BBF7D0; }
+.se-kw-chip-c1 text:first-of-type { color: #166534; }
+.se-kw-chip-c2 { background: #DBEAFE; border: 1rpx solid #BFDBFE; }
+.se-kw-chip-c2 text:first-of-type { color: #1E40AF; }
+.se-kw-chip-c3 { background: #EDE9FE; border: 1rpx solid #DDD6FE; }
+.se-kw-chip-c3 text:first-of-type { color: #5B21B6; }
+.se-kw-chip-c4 { background: #FFEDD5; border: 1rpx solid #FED7AA; }
+.se-kw-chip-c4 text:first-of-type { color: #C2410C; }
+.se-kw-chip-c5 { background: #FEF3C7; border: 1rpx solid #FDE68A; }
+.se-kw-chip-c5 text:first-of-type { color: #B45309; }
+.se-kw-chip-c6 { background: #CCFBF1; border: 1rpx solid #99F6E4; }
+.se-kw-chip-c6 text:first-of-type { color: #0F766E; }
+.se-kw-chip-c7 { background: #FCE7F3; border: 1rpx solid #FBCFE8; }
+.se-kw-chip-c7 text:first-of-type { color: #9D174D; }
 
 .se-kw-chip-del {
 	font-size: 24rpx;

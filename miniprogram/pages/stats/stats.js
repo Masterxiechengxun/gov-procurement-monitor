@@ -1,11 +1,15 @@
 var api = require("../../utils/api");
 var config = require("../../utils/config");
 
+// 与 config.getCategoryColorKey 对应的颜色索引，用于统计页样式
+var CAT_COLOR_INDEX_MAX = 8;
+
 Page({
-	data: {
-		loading: true,
-		isEmpty: false,
-		followedCats: [],
+		data: {
+			loading: true,
+			isEmpty: false,
+			followedCats: [],
+			legendItems: [],
 		overview: {
 			total: 0,
 			chemical: 0,
@@ -19,7 +23,11 @@ Page({
 	},
 
 	onLoad: function() {
-		this.setData({ followedCats: config.getFollowedCategories() });
+		var cats = config.getFollowedCategories();
+		this.setData({
+			followedCats: cats,
+			legendItems: this.getLegendItems(cats)
+		});
 		this.loadAnalytics();
 		this.syncCloudFollowed();
 	},
@@ -28,7 +36,11 @@ Page({
 		if (typeof this.getTabBar === "function" && this.getTabBar()) {
 			this.getTabBar().setData({ selected: 1 });
 		}
-		this.setData({ followedCats: config.getFollowedCategories() });
+		var cats = config.getFollowedCategories();
+		this.setData({
+			followedCats: cats,
+			legendItems: this.getLegendItems(cats)
+		});
 	},
 
 	syncCloudFollowed: function() {
@@ -36,7 +48,10 @@ Page({
 		api.getFollowedCategories().then(function(data) {
 			if (data && Array.isArray(data) && data.length > 0) {
 				config.setFollowedCategories(data);
-				self.setData({ followedCats: data });
+				self.setData({
+					followedCats: data,
+					legendItems: self.getLegendItems(data)
+				});
 			}
 		}).catch(function() {});
 	},
@@ -60,12 +75,14 @@ Page({
 				return;
 			}
 
+			var catRatios = self.processCatRatios(data.overview);
 			self.setData({
 				loading: false,
 				isEmpty: data.overview.total === 0,
 				overview: data.overview || self.data.overview,
 				dailyTrend: self.processTrend(data.dailyTrend || []),
-				catRatios: self.processCatRatios(data.overview),
+				catRatios: catRatios,
+				legendItems: self.getLegendItems(self.data.followedCats),
 				sourceDistribution: self.processHBars(data.sourceDistribution || [], "count"),
 				topKeywords: self.processHBars(data.topKeywords || [], "count"),
 				bidTypes: self.processHBars(data.bidTypes || [], "count")
@@ -124,10 +141,19 @@ Page({
 				name: catName,
 				percent: percent,
 				count: count,
-				total: total
+				total: total,
+				colorIndex: i % CAT_COLOR_INDEX_MAX
 			});
 		}
 		return ratios;
+	},
+
+	// 为 7 天趋势图例生成带颜色索引的列表
+	getLegendItems: function(cats) {
+		cats = cats || this.data.followedCats || [];
+		return cats.map(function(name, i) {
+			return { name: name, colorIndex: i % CAT_COLOR_INDEX_MAX };
+		});
 	},
 
 	processHBars: function(items, field) {
