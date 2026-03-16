@@ -13,6 +13,9 @@ Page({
 		var navHeight = statusBarHeight + 44;
 		var url = options.url ? decodeURIComponent(options.url) : "";
 		var title = options.title ? decodeURIComponent(options.title) : "招标详情";
+		if (title.length > 18) {
+			title = title.substring(0, 18) + "…";
+		}
 		this.setData({
 			url: url,
 			title: title,

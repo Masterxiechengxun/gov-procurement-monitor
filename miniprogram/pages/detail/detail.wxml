@@ -9,7 +9,7 @@
 </cover-view>
 
 <!-- web-view 铺满全屏，cover-view 导航栏浮于其上 -->
-<web-view wx:if="{{url && !error}}" src="{{url}}"></web-view>
+<web-view wx:if="{{url}}" src="{{url}}"></web-view>
 
 <!-- 错误态（无 url 时） -->
 <view wx:if="{{error}}" class="err-wrap" style="padding-top:{{navHeight}}px">
