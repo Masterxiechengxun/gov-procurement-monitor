@@ -1,0 +1,46 @@
+{
+	"pages": [
+		"pages/index/index",
+		"pages/stats/stats",
+		"pages/detail/detail",
+		"pages/filter/filter",
+		"pages/settings/settings"
+	],
+	"window": {
+		"backgroundColor": "#F1F5F9",
+		"backgroundTextStyle": "dark",
+		"navigationBarBackgroundColor": "#1E3A5F",
+		"navigationBarTitleText": "采购监控",
+		"navigationBarTextStyle": "white"
+	},
+	"tabBar": {
+		"custom": true,
+		"color": "#353535",
+		"selectedColor": "#2563EB",
+		"backgroundColor": "#FFFFFF",
+		"borderStyle": "white",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "采购信息",
+				"iconPath": "images/tab-cart.png",
+				"selectedIconPath": "images/tab-cart-active.png"
+			},
+			{
+				"pagePath": "pages/stats/stats",
+				"text": "数据统计",
+				"iconPath": "images/tab-chart.png",
+				"selectedIconPath": "images/tab-chart-active.png"
+			},
+			{
+				"pagePath": "pages/settings/settings",
+				"text": "我的设置",
+				"iconPath": "images/tab-gear.png",
+				"selectedIconPath": "images/tab-gear-active.png"
+			}
+		]
+	},
+	"sitemapLocation": "sitemap.json",
+	"cloud": true,
+	"usingComponents": {}
+}

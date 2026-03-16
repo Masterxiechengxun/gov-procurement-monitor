@@ -1,0 +1,314 @@
+/* ==================== 全局设计系统 ==================== */
+
+page {
+	background-color: #F1F5F9;
+	font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+	font-size: 28rpx;
+	color: #0F172A;
+	line-height: 1.6;
+	box-sizing: border-box;
+	-webkit-font-smoothing: antialiased;
+}
+
+view, text, scroll-view {
+	box-sizing: border-box;
+}
+
+/* ==================== 入场动画 ==================== */
+
+@keyframes fadeInUp {
+	from { opacity: 0; transform: translateY(40rpx); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes shimmer {
+	0% { background-position: -600rpx 0; }
+	100% { background-position: 600rpx 0; }
+}
+
+@keyframes pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.4; }
+}
+
+@keyframes scaleIn {
+	from { opacity: 0; transform: scale(0.92); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideDown {
+	from { opacity: 0; transform: translateY(-16rpx); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes barGrow {
+	from { transform: scaleY(0); }
+	to { transform: scaleY(1); }
+}
+
+@keyframes widthGrow {
+	from { width: 0; }
+}
+
+.anim-fade-in { animation: fadeIn 0.35s ease-out both; }
+.anim-fade-up { animation: fadeInUp 0.4s ease-out both; }
+.anim-scale-in { animation: scaleIn 0.3s ease-out both; }
+.anim-slide-down { animation: slideDown 0.3s ease-out both; }
+
+.anim-d1 { animation-delay: 0.06s; }
+.anim-d2 { animation-delay: 0.12s; }
+.anim-d3 { animation-delay: 0.18s; }
+.anim-d4 { animation-delay: 0.24s; }
+.anim-d5 { animation-delay: 0.3s; }
+.anim-d6 { animation-delay: 0.36s; }
+.anim-d7 { animation-delay: 0.42s; }
+
+/* ==================== 骨架屏 ==================== */
+
+.skeleton {
+	background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
+	background-size: 600rpx 100%;
+	animation: shimmer 1.6s infinite linear;
+	border-radius: 8rpx;
+}
+
+.skeleton-card {
+	background: #FFFFFF;
+	border-radius: 16rpx;
+	padding: 28rpx;
+	margin-bottom: 20rpx;
+}
+
+/* ==================== 通用布局 ==================== */
+
+.container { padding: 24rpx; }
+
+.text-ellipsis {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.text-ellipsis-2 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+/* ==================== 标签系统 ==================== */
+
+.tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 4rpx 14rpx;
+	border-radius: 6rpx;
+	font-size: 20rpx;
+	font-weight: 500;
+	letter-spacing: 0.5rpx;
+}
+
+.tag-new {
+	background-color: #FEF3C7;
+	color: #92400E;
+}
+
+.tag-chemical {
+	background-color: #FEE2E2;
+	color: #991B1B;
+}
+
+.tag-source {
+	background-color: #DBEAFE;
+	color: #1E40AF;
+}
+
+.tag-bid {
+	background-color: #F1F5F9;
+	color: #475569;
+}
+
+.keyword-highlight {
+	color: #DC2626;
+	font-weight: 600;
+}
+
+/* ==================== 按钮系统 ==================== */
+
+.btn-primary {
+	background: linear-gradient(135deg, #2563EB, #1D4ED8);
+	color: #FFFFFF;
+	border-radius: 12rpx;
+	font-size: 30rpx;
+	font-weight: 500;
+	text-align: center;
+	padding: 22rpx 0;
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+	box-shadow: 0 4rpx 14rpx rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary:active {
+	transform: scale(0.97);
+	box-shadow: 0 2rpx 6rpx rgba(37, 99, 235, 0.15);
+}
+
+.btn-secondary {
+	background: #F1F5F9;
+	color: #475569;
+	border-radius: 12rpx;
+	font-size: 28rpx;
+	font-weight: 500;
+	text-align: center;
+	padding: 20rpx 0;
+	transition: transform 0.15s ease;
+}
+
+.btn-secondary:active {
+	transform: scale(0.97);
+	background: #E2E8F0;
+}
+
+/* ==================== 加载指示器 ==================== */
+
+.loading-wrap {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 40rpx 0;
+	gap: 10rpx;
+}
+
+.loading-dot {
+	width: 12rpx;
+	height: 12rpx;
+	background: #94A3B8;
+	border-radius: 50%;
+	animation: pulse 1.2s ease-in-out infinite;
+}
+
+.loading-dot-2 { animation-delay: 0.2s; }
+.loading-dot-3 { animation-delay: 0.4s; }
+
+.loading-text {
+	text-align: center;
+	color: #94A3B8;
+	font-size: 24rpx;
+	padding: 40rpx 0;
+}
+
+/* ==================== 空白状态 ==================== */
+
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 100rpx 60rpx;
+	animation: fadeInUp 0.5s ease-out both;
+}
+
+.empty-illust {
+	width: 240rpx;
+	height: 200rpx;
+	margin-bottom: 40rpx;
+	position: relative;
+}
+
+.empty-doc {
+	width: 140rpx;
+	height: 170rpx;
+	background: #E2E8F0;
+	border-radius: 12rpx;
+	position: absolute;
+	left: 50rpx;
+	top: 10rpx;
+}
+
+.empty-doc-fold {
+	width: 0;
+	height: 0;
+	border-style: solid;
+	border-width: 0 40rpx 40rpx 0;
+	border-color: transparent #F1F5F9 transparent transparent;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.empty-doc-line {
+	width: 80rpx;
+	height: 8rpx;
+	background: #CBD5E1;
+	border-radius: 4rpx;
+	position: absolute;
+	left: 20rpx;
+}
+
+.empty-doc-line-1 { top: 60rpx; }
+.empty-doc-line-2 { top: 84rpx; width: 60rpx; }
+.empty-doc-line-3 { top: 108rpx; width: 90rpx; }
+
+.empty-mag {
+	width: 80rpx;
+	height: 80rpx;
+	border: 8rpx solid #94A3B8;
+	border-radius: 50%;
+	position: absolute;
+	right: 10rpx;
+	bottom: 10rpx;
+}
+
+.empty-mag-handle {
+	width: 8rpx;
+	height: 36rpx;
+	background: #94A3B8;
+	border-radius: 4rpx;
+	position: absolute;
+	right: 2rpx;
+	bottom: -30rpx;
+	transform: rotate(-45deg);
+	transform-origin: top center;
+}
+
+.empty-title {
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #334155;
+	margin-bottom: 12rpx;
+}
+
+.empty-desc {
+	font-size: 26rpx;
+	color: #94A3B8;
+	text-align: center;
+	line-height: 1.7;
+	margin-bottom: 40rpx;
+}
+
+.empty-action {
+	background: linear-gradient(135deg, #2563EB, #1D4ED8);
+	color: #FFFFFF;
+	padding: 18rpx 56rpx;
+	border-radius: 40rpx;
+	font-size: 28rpx;
+	font-weight: 500;
+	box-shadow: 0 4rpx 14rpx rgba(37, 99, 235, 0.25);
+	transition: transform 0.15s ease;
+}
+
+.empty-action:active {
+	transform: scale(0.97);
+}
+
+/* ==================== 分隔线 ==================== */
+
+.divider {
+	height: 1rpx;
+	background: #F1F5F9;
+}

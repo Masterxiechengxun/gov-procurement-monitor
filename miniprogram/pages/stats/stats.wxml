@@ -1,0 +1,147 @@
+<view class="page">
+
+	<!-- 骨架屏 -->
+	<block wx:if="{{loading}}">
+		<view class="st-grid anim-fade-in">
+			<view class="st-mc sk-card" wx:for="{{[1,2,3,4]}}" wx:key="*this">
+				<view class="skeleton" style="width:80rpx;height:50rpx;margin-bottom:12rpx;"></view>
+				<view class="skeleton" style="width:100rpx;height:24rpx;"></view>
+			</view>
+		</view>
+		<view class="st-section sk-card anim-fade-in">
+			<view class="skeleton" style="width:200rpx;height:32rpx;margin-bottom:24rpx;"></view>
+			<view class="skeleton" style="width:100%;height:260rpx;"></view>
+		</view>
+	</block>
+
+	<!-- 数据内容 -->
+	<block wx:if="{{!loading}}">
+		<!-- 概览指标卡片 -->
+		<view class="st-grid">
+			<view class="st-mc anim-scale-in">
+				<text class="st-mc-val">{{overview.total}}</text>
+				<text class="st-mc-lbl">采购总量</text>
+				<view class="st-mc-bar st-mc-bar-blue"></view>
+			</view>
+			<view class="st-mc anim-scale-in anim-d1">
+				<text class="st-mc-val st-val-amber">{{overview.todayNew}}</text>
+				<text class="st-mc-lbl">今日新增</text>
+				<view class="st-mc-bar st-mc-bar-amber"></view>
+			</view>
+			<view class="st-mc anim-scale-in anim-d2">
+				<text class="st-mc-val st-val-green">{{overview.activeSources}}</text>
+				<text class="st-mc-lbl">监控源</text>
+				<view class="st-mc-bar st-mc-bar-green"></view>
+			</view>
+			<view wx:for="{{catRatios}}" wx:key="name" class="st-mc anim-scale-in anim-d3">
+				<text class="st-mc-val st-val-red">{{item.count}}</text>
+				<text class="st-mc-lbl">{{item.name}}</text>
+				<view class="st-mc-bar st-mc-bar-red"></view>
+			</view>
+		</view>
+
+		<!-- 7天采购趋势 -->
+		<view class="st-section anim-fade-up">
+			<text class="st-sec-title">近7天采购趋势</text>
+			<view class="st-bar-chart">
+				<view wx:for="{{dailyTrend}}" wx:key="date" class="st-bar-col">
+					<text class="st-bar-val">{{item.count}}</text>
+					<view class="st-bar-track">
+						<view class="st-bar-fill st-bar-fill-total" style="height:{{item.heightPct}}%;">
+							<view wx:if="{{item.chemPct > 0}}" class="st-bar-fill-chem" style="height:{{item.chemPct}}%;"></view>
+						</view>
+					</view>
+					<text class="st-bar-label">{{item.label}}</text>
+				</view>
+			</view>
+			<view class="st-bar-legend">
+				<view class="st-legend-item">
+					<view class="st-legend-dot st-ld-blue"></view>
+					<text>全部</text>
+				</view>
+				<view wx:for="{{followedCats}}" wx:key="*this" class="st-legend-item">
+					<view class="st-legend-dot st-ld-red"></view>
+					<text>{{item}}</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 关注分类占比 -->
+		<view wx:for="{{catRatios}}" wx:key="name" class="st-section anim-fade-up anim-d1">
+			<text class="st-sec-title">{{item.name}}占比</text>
+			<view class="st-ratio-card">
+				<view class="st-ratio-main">
+					<text class="st-ratio-num">{{item.percent}}</text>
+					<text class="st-ratio-pct">%</text>
+				</view>
+				<view class="st-ratio-bar">
+					<view class="st-ratio-bar-fill" style="width:{{item.percent}}%;"></view>
+				</view>
+				<view class="st-ratio-meta">
+					<text class="st-ratio-meta-item">{{item.name}}相关 {{item.count}} 条</text>
+					<text class="st-ratio-meta-item">全部 {{item.total}} 条</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 来源分布 -->
+		<view wx:if="{{sourceDistribution.length > 0}}" class="st-section anim-fade-up anim-d2">
+			<text class="st-sec-title">信息来源分布</text>
+			<view class="st-h-bars">
+				<view wx:for="{{sourceDistribution}}" wx:key="source" class="st-hbar-row">
+					<text class="st-hbar-name">{{item.name}}</text>
+					<view class="st-hbar-track">
+						<view class="st-hbar-fill st-hbar-fill-blue" style="width:{{item.widthPct}}%;"></view>
+					</view>
+					<text class="st-hbar-val">{{item.count}}</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 关键词排行 -->
+		<view wx:if="{{topKeywords.length > 0}}" class="st-section anim-fade-up anim-d3">
+			<text class="st-sec-title">热门关键词 TOP{{topKeywords.length}}</text>
+			<view class="st-h-bars">
+				<view wx:for="{{topKeywords}}" wx:key="keyword" class="st-hbar-row">
+					<text class="st-hbar-rank">{{index + 1}}</text>
+					<text class="st-hbar-name st-hbar-name-kw">{{item.keyword}}</text>
+					<view class="st-hbar-track">
+						<view class="st-hbar-fill st-hbar-fill-red" style="width:{{item.widthPct}}%;"></view>
+					</view>
+					<text class="st-hbar-val">{{item.count}}</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 采购类型分布 -->
+		<view wx:if="{{bidTypes.length > 0}}" class="st-section anim-fade-up anim-d4">
+			<text class="st-sec-title">采购类型分布</text>
+			<view class="st-h-bars">
+				<view wx:for="{{bidTypes}}" wx:key="type" class="st-hbar-row">
+					<text class="st-hbar-name">{{item.type}}</text>
+					<view class="st-hbar-track">
+						<view class="st-hbar-fill st-hbar-fill-teal" style="width:{{item.widthPct}}%;"></view>
+					</view>
+					<text class="st-hbar-val">{{item.count}}</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 空白状态 -->
+		<view wx:if="{{isEmpty}}" class="empty-state">
+			<view class="empty-illust">
+				<view class="empty-doc">
+					<view class="empty-doc-fold"></view>
+					<view class="empty-doc-line empty-doc-line-1"></view>
+					<view class="empty-doc-line empty-doc-line-2"></view>
+					<view class="empty-doc-line empty-doc-line-3"></view>
+				</view>
+				<view class="empty-mag">
+					<view class="empty-mag-handle"></view>
+				</view>
+			</view>
+			<text class="empty-title">暂无统计数据</text>
+			<text class="empty-desc">数据将在首次抓取完成后展示</text>
+		</view>
+	</block>
+</view>

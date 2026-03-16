@@ -1,0 +1,13 @@
+{
+	"timeout": 300,
+	"permissions": {
+		"openapi": []
+	},
+	"triggers": [
+		{
+			"name": "hourlyTrigger",
+			"type": "timer",
+			"config": "0 0 * * * * *"
+		}
+	]
+}

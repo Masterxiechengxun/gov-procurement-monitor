@@ -1,0 +1,183 @@
+.page {
+	min-height: 100vh;
+	background: #F1F5F9;
+	padding-bottom: 160rpx;
+}
+
+/* ==================== 分组区域 ==================== */
+
+.fl-section {
+	background: #FFFFFF;
+	margin: 20rpx 24rpx;
+	border-radius: 16rpx;
+	padding: 28rpx;
+	box-shadow: 0 2rpx 12rpx rgba(15, 23, 42, 0.04);
+}
+
+.fl-sec-title {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #0F172A;
+	margin-bottom: 20rpx;
+	display: block;
+}
+
+/* ==================== 选项按钮 ==================== */
+
+.fl-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14rpx;
+}
+
+.fl-opt {
+	padding: 12rpx 28rpx;
+	border-radius: 8rpx;
+	font-size: 24rpx;
+	font-weight: 500;
+	color: #64748B;
+	background: #F8FAFC;
+	border: 1rpx solid #E2E8F0;
+	transition: all 0.2s ease;
+}
+
+.fl-opt-on {
+	background: #1E40AF;
+	color: #FFFFFF;
+	border-color: #1E40AF;
+	box-shadow: 0 2rpx 8rpx rgba(30, 64, 175, 0.3);
+}
+
+.fl-opt:active { transform: scale(0.96); }
+
+/* ==================== 日期选择 ==================== */
+
+.fl-date-custom {
+	margin-top: 20rpx;
+	background: #F8FAFC;
+	border-radius: 12rpx;
+	overflow: hidden;
+}
+
+.fl-date-row {
+	display: flex;
+	align-items: center;
+	padding: 20rpx;
+	border-bottom: 1rpx solid #E2E8F0;
+}
+
+.fl-date-row-last { border-bottom: none; }
+
+.fl-date-label {
+	font-size: 26rpx;
+	color: #64748B;
+	width: 140rpx;
+}
+
+.fl-date-val {
+	font-size: 26rpx;
+	color: #2563EB;
+	font-weight: 500;
+}
+
+/* ==================== 开关行 ==================== */
+
+.fl-switch-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 14rpx 0;
+	border-bottom: 1rpx solid #F1F5F9;
+}
+
+.fl-switch-row-last {
+	border-bottom: none;
+}
+
+.fl-switch-label {
+	font-size: 28rpx;
+	color: #0F172A;
+}
+
+/* ==================== 搜索框 ==================== */
+
+.fl-search-wrap {
+	display: flex;
+	align-items: center;
+	background: #F8FAFC;
+	border-radius: 12rpx;
+	padding: 4rpx 20rpx;
+	border: 1rpx solid #E2E8F0;
+}
+
+.fl-search-icon {
+	width: 28rpx;
+	height: 28rpx;
+	border: 3rpx solid #94A3B8;
+	border-radius: 50%;
+	margin-right: 14rpx;
+	flex-shrink: 0;
+	position: relative;
+}
+
+.fl-search-input {
+	flex: 1;
+	font-size: 26rpx;
+	height: 72rpx;
+	color: #0F172A;
+}
+
+.fl-clear-btn {
+	padding: 12rpx;
+	flex-shrink: 0;
+}
+
+.fl-clear-x {
+	font-size: 30rpx;
+	color: #94A3B8;
+	line-height: 1;
+}
+
+/* ==================== 底部按钮 ==================== */
+
+.fl-bottom {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	display: flex;
+	gap: 16rpx;
+	padding: 20rpx 30rpx;
+	padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+	background: #FFFFFF;
+	box-shadow: 0 -2rpx 16rpx rgba(15, 23, 42, 0.06);
+}
+
+.fl-btn-reset {
+	flex: 1;
+	text-align: center;
+	padding: 22rpx 0;
+	border-radius: 12rpx;
+	font-size: 30rpx;
+	font-weight: 500;
+	color: #64748B;
+	background: #F1F5F9;
+	transition: transform 0.15s ease;
+}
+
+.fl-btn-apply {
+	flex: 2;
+	text-align: center;
+	padding: 22rpx 0;
+	border-radius: 12rpx;
+	font-size: 30rpx;
+	font-weight: 500;
+	color: #FFFFFF;
+	background: linear-gradient(135deg, #2563EB, #1D4ED8);
+	box-shadow: 0 4rpx 14rpx rgba(37, 99, 235, 0.25);
+	transition: transform 0.15s ease;
+}
+
+.fl-btn-reset:active, .fl-btn-apply:active {
+	transform: scale(0.97);
+}

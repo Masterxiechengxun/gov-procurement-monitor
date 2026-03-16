@@ -1,0 +1,313 @@
+<view class="page">
+
+	<!-- 采购网站列表 -->
+	<view class="se-card anim-fade-up">
+		<view class="se-card-head">
+			<view class="se-icon-wrap se-icon-site">
+				<view class="sico sico-globe">
+					<view class="sico-globe-ring"></view>
+					<view class="sico-globe-h"></view>
+					<view class="sico-globe-v"></view>
+				</view>
+			</view>
+			<view>
+				<text class="se-card-title">采购网站</text>
+				<text class="se-card-desc">管理需要抓取的采购网站</text>
+			</view>
+		</view>
+
+		<view class="se-source-list">
+			<view wx:for="{{sources}}" wx:key="id" class="se-source-row">
+			<view class="se-source-info">
+				<text class="se-source-name">{{item.name}}</text>
+				<text class="se-source-url">{{item.website}}</text>
+			</view>
+			<view class="se-del-btn" catchtap="deleteSource" data-idx="{{index}}">
+					<text>删除</text>
+				</view>
+			</view>
+		</view>
+
+		<view wx:if="{{showAddSource}}" class="se-add-form">
+			<input class="se-add-input" placeholder="网站名称" placeholder-style="color:#94A3B8;" value="{{newSourceName}}" bindinput="onNewSourceName" />
+			<input class="se-add-input" placeholder="网站地址（https://...）" placeholder-style="color:#94A3B8;" value="{{newSourceUrl}}" bindinput="onNewSourceUrl" />
+			<view class="se-form-btns">
+				<view class="se-fbtn se-fbtn-cancel" bindtap="hideAddSourceForm"><text>取消</text></view>
+				<view class="se-fbtn se-fbtn-ok" bindtap="addSource"><text>添加</text></view>
+			</view>
+		</view>
+	<view wx:else class="se-add-trigger" bindtap="showAddSourceForm">
+		<text class="se-add-plus">+</text>
+		<text>添加网站</text>
+	</view>
+	</view>
+
+	<!-- 设备关键字 -->
+	<view class="se-card anim-fade-up anim-d1">
+		<view class="se-card-head">
+			<view class="se-icon-wrap se-icon-keyword">
+				<view class="sico sico-tag">
+					<view class="sico-tag-body">
+						<view class="sico-tag-hole"></view>
+					</view>
+					<view class="sico-tag-tail"></view>
+				</view>
+			</view>
+			<view>
+				<text class="se-card-title">设备关键字</text>
+				<text class="se-card-desc">管理采购信息匹配的设备关键字</text>
+			</view>
+		</view>
+
+		<view class="se-kw-cats">
+			<view wx:for="{{keywordCatNames}}" wx:key="*this" class="se-kw-cat">
+			<view class="se-kw-cat-hd" bindtap="toggleCatExpand" data-cat="{{item}}">
+				<text class="se-kw-cat-name">{{item}}</text>
+				<view class="se-kw-cat-right">
+					<view class="se-follow-btn {{followedCats[item] ? 'se-follow-btn-active' : ''}}" catchtap="toggleCatFollow" data-cat="{{item}}">
+						<text>{{followedCats[item] ? '已关注' : '关注'}}</text>
+					</view>
+					<text class="se-kw-cat-count">{{keywordCategories[item].length}}</text>
+					<view class="se-arrow {{expandedCats[item] ? 'se-arrow-up' : ''}}"></view>
+				</view>
+			</view>
+
+				<view wx:if="{{expandedCats[item]}}" class="se-kw-body">
+					<view class="se-kw-chips">
+						<view wx:for="{{keywordCategories[item]}}" wx:for-item="word" wx:key="*this" class="se-kw-chip">
+							<text>{{word}}</text>
+							<text class="se-kw-chip-del" catchtap="deleteKeyword" data-cat="{{item}}" data-word="{{word}}">×</text>
+						</view>
+					</view>
+					<view wx:if="{{addingWordCat === item}}" class="se-kw-add-row">
+						<input class="se-kw-add-input" placeholder="输入新设备关键字" placeholder-style="color:#94A3B8;" value="{{newWord}}" bindinput="onNewWordInput" focus="true" confirm-type="done" bindconfirm="addWord" />
+						<view class="se-fbtn se-fbtn-ok se-fbtn-mini" catchtap="addWord"><text>添加</text></view>
+						<view class="se-fbtn se-fbtn-cancel se-fbtn-mini" catchtap="hideAddWordInput"><text>取消</text></view>
+					</view>
+					<view wx:else class="se-kw-footer">
+						<text class="se-kw-add-link" catchtap="showAddWordInput" data-cat="{{item}}">+ 添加关键字</text>
+						<text class="se-kw-del-cat" catchtap="deleteCategory" data-cat="{{item}}">删除分类</text>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<view wx:if="{{showAddCategory}}" class="se-add-form">
+			<input class="se-add-input" placeholder="新分类名称（如：环境监测）" placeholder-style="color:#94A3B8;" value="{{newCatName}}" bindinput="onNewCatName" focus="true" />
+			<view class="se-form-btns">
+				<view class="se-fbtn se-fbtn-cancel" bindtap="hideAddCategoryForm"><text>取消</text></view>
+				<view class="se-fbtn se-fbtn-ok" bindtap="addCategory"><text>创建分类</text></view>
+			</view>
+		</view>
+	<view wx:else class="se-add-trigger" bindtap="showAddCategoryForm">
+		<text class="se-add-plus">+</text>
+		<text>添加设备关键字分类</text>
+	</view>
+	</view>
+
+	<!-- 自动抓取策略 -->
+	<view class="se-card anim-fade-up anim-d2">
+		<view class="se-card-head">
+			<view class="se-icon-wrap se-icon-schedule">
+				<view class="sico sico-clock">
+					<view class="sico-clock-face">
+						<view class="sico-clock-h"></view>
+						<view class="sico-clock-m"></view>
+						<view class="sico-clock-center"></view>
+					</view>
+				</view>
+			</view>
+			<view>
+				<text class="se-card-title">自动抓取策略</text>
+				<text class="se-card-desc">设置抓取时间和频率</text>
+			</view>
+		</view>
+
+		<view class="se-row">
+			<text class="se-row-label">启用自动抓取</text>
+			<switch checked="{{schedule.enabled}}" bindchange="toggleScheduleEnabled" color="#2563EB" />
+		</view>
+		<view class="se-row">
+			<text class="se-row-label">抓取间隔</text>
+			<picker range="{{intervalOptions}}" value="{{intervalIndex}}" bindchange="onIntervalChange">
+				<view class="se-picker">每 {{intervalOptions[intervalIndex]}} 小时</view>
+			</picker>
+		</view>
+		<view class="se-row">
+			<text class="se-row-label">执行日期</text>
+			<picker range="{{dayTypeOptions}}" value="{{dayTypeIndex}}" bindchange="onDayTypeChange">
+				<view class="se-picker">{{dayTypeOptions[dayTypeIndex]}}</view>
+			</picker>
+		</view>
+		<view class="se-row se-row-last">
+			<text class="se-row-label">首次执行时间</text>
+			<view class="se-time-group">
+				<picker range="{{hourOptions}}" value="{{hourIndex}}" bindchange="onStartHourChange">
+					<view class="se-picker se-picker-sm">{{hourOptions[hourIndex]}}时</view>
+				</picker>
+				<text class="se-time-sep">:</text>
+				<picker range="{{minuteOptions}}" value="{{minuteIndex}}" bindchange="onStartMinuteChange">
+					<view class="se-picker se-picker-sm">{{minuteOptions[minuteIndex]}}分</view>
+				</picker>
+			</view>
+		</view>
+
+		<view class="se-summary {{schedule.enabled ? 'se-summary-on' : ''}}">
+			<text wx:if="{{schedule.enabled}}">{{dayTypeOptions[dayTypeIndex]}} {{hourOptions[hourIndex]}}:{{minuteOptions[minuteIndex]}} 起，每 {{intervalOptions[intervalIndex]}} 小时执行</text>
+			<text wx:else>自动抓取已关闭</text>
+		</view>
+	</view>
+
+	<!-- 手动抓取 & 抓取日志 -->
+	<view class="se-card anim-fade-up anim-d3">
+		<view class="se-card-head">
+			<view class="se-icon-wrap se-icon-crawl">
+				<view class="sico sico-bolt">
+					<view class="sico-bolt-top"></view>
+					<view class="sico-bolt-bot"></view>
+				</view>
+			</view>
+			<view>
+				<text class="se-card-title">手动抓取</text>
+				<text class="se-card-desc">手动触发抓取和查看日志</text>
+			</view>
+		</view>
+
+		<view class="se-action-btn se-btn-outline {{crawling ? 'se-btn-disabled' : ''}}" bindtap="manualCrawl">
+			<text wx:if="{{!crawling}}">手动触发一次抓取</text>
+			<view wx:else class="se-crawling-row">
+				<view class="loading-dot"></view>
+				<view class="loading-dot loading-dot-2"></view>
+				<view class="loading-dot loading-dot-3"></view>
+				<text style="margin-left:12rpx;">抓取进行中...</text>
+			</view>
+		</view>
+
+		<view wx:if="{{lastCrawl}}" class="se-log-panel">
+			<view class="se-log-header">
+				<text class="se-log-title">上次抓取记录</text>
+				<text class="se-log-date">{{lastCrawl.date}}</text>
+			</view>
+			<view class="se-log-metrics">
+				<view class="se-log-metric">
+					<text class="se-log-val">{{lastCrawl.totalFound || 0}}</text>
+					<text class="se-log-lbl">总抓取</text>
+				</view>
+				<view class="se-log-metric">
+					<text class="se-log-val se-log-val-blue">{{lastCrawl.newItems || 0}}</text>
+					<text class="se-log-lbl">新增</text>
+				</view>
+				<view class="se-log-metric">
+					<text class="se-log-val se-log-val-red">{{lastCrawl.matchedItems || 0}}</text>
+					<text class="se-log-lbl">关注匹配</text>
+				</view>
+				<view class="se-log-metric">
+					<text class="se-log-val">{{lastCrawl.durationText}}</text>
+					<text class="se-log-lbl">耗时</text>
+				</view>
+			</view>
+
+			<view wx:if="{{lastCrawl.sourceDetails && lastCrawl.sourceDetails.length > 0}}" class="se-log-sources">
+				<view wx:for="{{lastCrawl.sourceDetails}}" wx:key="sourceId" class="se-log-src-row">
+					<view class="se-status-dot {{item.status === 'success' ? 'se-dot-ok' : (item.status === 'partial' ? 'se-dot-warn' : 'se-dot-err')}}"></view>
+					<text class="se-log-src-name">{{item.sourceName}}</text>
+					<text wx:if="{{item.status === 'success'}}" class="se-log-src-info">{{item.itemsFound}}/{{item.newItems}}</text>
+					<text wx:else class="se-log-src-err">{{item.errorMessage}}</text>
+				</view>
+			</view>
+
+			<view wx:if="{{lastCrawl.errors && lastCrawl.errors.length > 0}}" class="se-log-err-box">
+				<text class="se-log-err-title">错误 ({{lastCrawl.errors.length}})</text>
+				<view wx:for="{{lastCrawl.errors}}" wx:key="index" wx:if="{{index < 3}}">
+					<text class="se-log-err-item">{{item.source}}: {{item.message}}</text>
+				</view>
+				<text wx:if="{{lastCrawl.errors.length > 3}}" class="se-log-err-more">...还有 {{lastCrawl.errors.length - 3}} 条</text>
+			</view>
+		</view>
+	</view>
+
+	<!-- 推送通知 -->
+	<view class="se-card anim-fade-up anim-d4">
+		<view class="se-card-head">
+			<view class="se-icon-wrap se-icon-push">
+				<view class="sico sico-bell">
+					<view class="sico-bell-dome"></view>
+					<view class="sico-bell-body"></view>
+					<view class="sico-bell-dot"></view>
+				</view>
+			</view>
+			<view>
+				<text class="se-card-title">推送通知</text>
+				<text class="se-card-desc">自动推送新增采购信息到微信</text>
+			</view>
+		</view>
+		<view class="se-input-group">
+			<text class="se-input-label">Token</text>
+			<input
+				class="se-input"
+				placeholder="请输入 PushPlus Token"
+				placeholder-style="color:#94A3B8;"
+				value="{{pushplusToken}}"
+				bindinput="onTokenInput"
+				password="{{!showToken}}"
+			/>
+			<view class="se-eye-btn" bindtap="toggleShowToken">
+				<text>{{showToken ? '隐藏' : '显示'}}</text>
+			</view>
+		</view>
+		<view class="se-action-btn se-btn-fill" bindtap="saveToken">
+			<text>保存 Token</text>
+		</view>
+		<text class="se-help">访问 pushplus.plus 微信扫码注册后，复制 Token 粘贴到此处</text>
+	</view>
+
+	<!-- 数据管理 -->
+	<view class="se-card anim-fade-up anim-d5">
+		<view class="se-card-head">
+			<view class="se-icon-wrap se-icon-data">
+				<view class="sico sico-db">
+					<view class="sico-db-layer"></view>
+					<view class="sico-db-layer"></view>
+					<view class="sico-db-layer"></view>
+				</view>
+			</view>
+			<view>
+				<text class="se-card-title">数据管理</text>
+				<text class="se-card-desc">管理采购数据的保留期限</text>
+			</view>
+		</view>
+
+		<view class="se-row se-row-last">
+			<text class="se-row-label">数据保留天数</text>
+			<picker range="{{retentionOptions}}" value="{{retentionIndex}}" bindchange="onRetentionChange">
+				<view class="se-picker">{{retentionOptions[retentionIndex]}} 天</view>
+			</picker>
+		</view>
+
+		<view wx:if="{{storageInfo}}" class="se-storage">
+			<view class="se-storage-grid">
+				<view class="se-storage-cell">
+					<text class="se-storage-val">{{storageInfo.total}}</text>
+					<text class="se-storage-lbl">采购总数</text>
+				</view>
+				<view class="se-storage-cell">
+					<text class="se-storage-val">{{storageInfo.chemical}}</text>
+					<text class="se-storage-lbl">关注匹配</text>
+				</view>
+				<view class="se-storage-cell">
+					<text class="se-storage-val">{{storageInfo.todayNew}}</text>
+					<text class="se-storage-lbl">今日新增</text>
+				</view>
+			</view>
+			<view class="se-storage-bar-row">
+				<text class="se-storage-size">{{storageInfo.sizeText}}</text>
+				<text class="se-storage-pct">{{storageInfo.usagePercent}}%</text>
+			</view>
+			<view class="se-storage-bar">
+				<view class="se-storage-bar-fill" style="width: {{storageInfo.usagePercent}}%;"></view>
+			</view>
+			<text class="se-storage-hint">2 GB 免费额度</text>
+		</view>
+	</view>
+
+</view>

@@ -1,0 +1,49 @@
+<view class="pc-card anim-fade-up" bindtap="onTap">
+	<view class="pc-header">
+		<view class="pc-tags">
+			<view wx:if="{{item.isNew}}" class="pc-tag pc-tag-new">
+				<text>NEW</text>
+			</view>
+			<view wx:if="{{item.isChemical && followedCats.length > 0}}" class="pc-tag pc-tag-chem">
+				<text>{{followedCats[0]}}</text>
+			</view>
+			<view class="pc-tag pc-tag-src">
+				<text>{{item.sourceName}}</text>
+			</view>
+		</view>
+		<text class="pc-date">{{item.publishDate}}</text>
+	</view>
+
+	<view class="pc-title">
+		<block wx:for="{{titleParts}}" wx:key="index">
+			<text wx:if="{{item.highlight}}" class="pc-kw-hl">{{item.text}}</text>
+			<text wx:else>{{item.text}}</text>
+		</block>
+	</view>
+
+	<view class="pc-meta">
+		<view wx:if="{{item.buyer}}" class="pc-meta-item">
+			<view class="pc-meta-dot pc-dot-blue"></view>
+			<text class="pc-meta-val">{{item.buyer}}</text>
+		</view>
+		<view wx:if="{{item.region}}" class="pc-meta-item">
+			<view class="pc-meta-dot pc-dot-green"></view>
+			<text class="pc-meta-val">{{item.region}}</text>
+		</view>
+		<view wx:if="{{item.bidType}}" class="pc-meta-item">
+			<view class="pc-meta-dot pc-dot-amber"></view>
+			<text class="pc-meta-val">{{item.bidType}}</text>
+		</view>
+	</view>
+
+	<view wx:if="{{item.isChemical && item.matchedKeywords.length > 0}}" class="pc-kw-row">
+		<text class="pc-kw-label">匹配关键词</text>
+		<view class="pc-kw-list">
+			<text wx:for="{{item.matchedKeywords}}" wx:for-item="kw" wx:key="*this" class="pc-kw-chip">{{kw}}</text>
+		</view>
+	</view>
+
+	<view class="pc-arrow">
+		<view class="pc-arrow-icon"></view>
+	</view>
+</view>

@@ -1,0 +1,8 @@
+{
+	"usingComponents": {
+		"procurement-card": "/components/procurement-card/index"
+	},
+	"navigationBarTitleText": "采购信息",
+	"enablePullDownRefresh": true,
+	"onReachBottomDistance": 100
+}

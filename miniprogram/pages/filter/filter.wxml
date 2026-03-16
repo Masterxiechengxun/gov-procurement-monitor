@@ -1,0 +1,92 @@
+<view class="page">
+	<!-- 来源筛选 -->
+	<view class="fl-section anim-fade-up">
+		<text class="fl-sec-title">信息来源</text>
+		<view class="fl-options">
+			<view
+				class="fl-opt {{selectedSource === '' ? 'fl-opt-on' : ''}}"
+				bindtap="onSelectSource"
+				data-source=""
+			>
+				<text>全部</text>
+			</view>
+			<view
+				wx:for="{{sourceList}}"
+				wx:key="id"
+				class="fl-opt {{selectedSource === item.id ? 'fl-opt-on' : ''}}"
+				bindtap="onSelectSource"
+				data-source="{{item.id}}"
+			>
+				<text>{{item.name}}</text>
+			</view>
+		</view>
+	</view>
+
+	<!-- 日期筛选 -->
+	<view class="fl-section anim-fade-up anim-d1">
+		<text class="fl-sec-title">日期范围</text>
+		<view class="fl-options">
+			<view
+				wx:for="{{dateOptions}}"
+				wx:key="value"
+				class="fl-opt {{selectedDateOption === item.value ? 'fl-opt-on' : ''}}"
+				bindtap="onSelectDateOption"
+				data-value="{{item.value}}"
+			>
+				<text>{{item.label}}</text>
+			</view>
+		</view>
+		<view wx:if="{{selectedDateOption === 'custom'}}" class="fl-date-custom anim-slide-down">
+			<view class="fl-date-row">
+				<text class="fl-date-label">起始日期</text>
+				<picker mode="date" value="{{dateFrom}}" bindchange="onDateFromChange">
+					<view class="fl-date-val">{{dateFrom || '选择日期'}}</view>
+				</picker>
+			</view>
+			<view class="fl-date-row fl-date-row-last">
+				<text class="fl-date-label">截止日期</text>
+				<picker mode="date" value="{{dateTo}}" bindchange="onDateToChange">
+					<view class="fl-date-val">{{dateTo || '选择日期'}}</view>
+				</picker>
+			</view>
+		</view>
+	</view>
+
+	<!-- 内容筛选 -->
+	<view class="fl-section anim-fade-up anim-d2">
+		<text class="fl-sec-title">内容筛选</text>
+		<view wx:for="{{followedCats}}" wx:key="*this" class="fl-switch-row {{index === followedCats.length - 1 ? 'fl-switch-row-last' : ''}}">
+			<text class="fl-switch-label">仅看{{item}}相关</text>
+			<switch checked="{{selectedCats[item]}}" bindchange="onCatToggle" data-cat="{{item}}" color="#2563EB" />
+		</view>
+	</view>
+
+	<!-- 关键词搜索 -->
+	<view class="fl-section anim-fade-up anim-d3">
+		<text class="fl-sec-title">关键词搜索</text>
+		<view class="fl-search-wrap">
+			<view class="fl-search-icon"></view>
+			<input
+				class="fl-search-input"
+				placeholder="输入关键词搜索标题"
+				placeholder-style="color:#94A3B8;"
+				value="{{keyword}}"
+				bindinput="onKeywordInput"
+				confirm-type="search"
+			/>
+			<view wx:if="{{keyword}}" class="fl-clear-btn" bindtap="clearKeyword">
+				<text class="fl-clear-x">×</text>
+			</view>
+		</view>
+	</view>
+
+	<!-- 底部按钮 -->
+	<view class="fl-bottom">
+		<view class="fl-btn-reset" bindtap="onReset">
+			<text>重置</text>
+		</view>
+		<view class="fl-btn-apply" bindtap="onApply">
+			<text>应用筛选</text>
+		</view>
+	</view>
+</view>

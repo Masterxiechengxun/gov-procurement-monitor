@@ -1,0 +1,13 @@
+{
+	"timeout": 60,
+	"permissions": {
+		"openapi": []
+	},
+	"triggers": [
+		{
+			"name": "weeklyClean",
+			"type": "timer",
+			"config": "0 0 3 * * 0 *"
+		}
+	]
+}

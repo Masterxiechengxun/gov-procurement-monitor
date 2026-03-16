@@ -1,0 +1,303 @@
+.page {
+	min-height: 100vh;
+	background: #F1F5F9;
+	padding: 20rpx 24rpx 80rpx;
+}
+
+/* ==================== 概览指标网格 ==================== */
+
+.st-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16rpx;
+	margin-bottom: 20rpx;
+}
+
+.st-mc {
+	width: calc(50% - 8rpx);
+	background: #FFFFFF;
+	border-radius: 16rpx;
+	padding: 24rpx;
+	box-shadow: 0 2rpx 12rpx rgba(15, 23, 42, 0.04);
+	position: relative;
+	overflow: hidden;
+}
+
+.st-mc-val {
+	font-size: 48rpx;
+	font-weight: 800;
+	color: #0F172A;
+	display: block;
+	line-height: 1.1;
+}
+
+.st-val-red { color: #DC2626; }
+.st-val-amber { color: #D97706; }
+.st-val-green { color: #059669; }
+
+.st-mc-lbl {
+	font-size: 22rpx;
+	color: #94A3B8;
+	display: block;
+	margin-top: 8rpx;
+	letter-spacing: 1rpx;
+}
+
+.st-mc-bar {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 6rpx;
+}
+
+.st-mc-bar-blue { background: linear-gradient(90deg, #2563EB, #60A5FA); }
+.st-mc-bar-red { background: linear-gradient(90deg, #DC2626, #F87171); }
+.st-mc-bar-amber { background: linear-gradient(90deg, #D97706, #FBBF24); }
+.st-mc-bar-green { background: linear-gradient(90deg, #059669, #34D399); }
+
+/* ==================== 通用区块 ==================== */
+
+.st-section {
+	background: #FFFFFF;
+	border-radius: 16rpx;
+	padding: 28rpx;
+	margin-bottom: 20rpx;
+	box-shadow: 0 2rpx 12rpx rgba(15, 23, 42, 0.04);
+}
+
+.st-sec-title {
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #0F172A;
+	display: block;
+	margin-bottom: 24rpx;
+}
+
+/* ==================== 7天趋势柱状图 ==================== */
+
+.st-bar-chart {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+	height: 300rpx;
+	padding-top: 40rpx;
+}
+
+.st-bar-col {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
+	height: 100%;
+	position: relative;
+}
+
+.st-bar-val {
+	font-size: 20rpx;
+	color: #64748B;
+	font-weight: 600;
+	margin-bottom: 8rpx;
+	min-height: 28rpx;
+}
+
+.st-bar-track {
+	flex: 1;
+	width: 36rpx;
+	background: #F1F5F9;
+	border-radius: 6rpx 6rpx 0 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	overflow: hidden;
+}
+
+.st-bar-fill-total {
+	width: 100%;
+	background: linear-gradient(180deg, #3B82F6, #2563EB);
+	border-radius: 6rpx 6rpx 0 0;
+	min-height: 4rpx;
+	position: relative;
+	animation: barGrow 0.6s ease-out both;
+	transform-origin: bottom;
+}
+
+.st-bar-fill-chem {
+	width: 100%;
+	background: linear-gradient(180deg, #F87171, #DC2626);
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	border-radius: 0;
+}
+
+.st-bar-label {
+	font-size: 20rpx;
+	color: #94A3B8;
+	margin-top: 10rpx;
+}
+
+.st-bar-legend {
+	display: flex;
+	justify-content: center;
+	gap: 32rpx;
+	margin-top: 20rpx;
+	padding-top: 16rpx;
+	border-top: 1rpx solid #F1F5F9;
+}
+
+.st-legend-item {
+	display: flex;
+	align-items: center;
+	gap: 8rpx;
+}
+
+.st-legend-item text {
+	font-size: 22rpx;
+	color: #64748B;
+}
+
+.st-legend-dot {
+	width: 16rpx;
+	height: 16rpx;
+	border-radius: 4rpx;
+}
+
+.st-ld-blue { background: #2563EB; }
+.st-ld-red { background: #DC2626; }
+
+/* ==================== 化学仪器占比 ==================== */
+
+.st-ratio-card {
+	text-align: center;
+	padding: 16rpx 0;
+}
+
+.st-ratio-main {
+	display: flex;
+	align-items: baseline;
+	justify-content: center;
+	margin-bottom: 24rpx;
+}
+
+.st-ratio-num {
+	font-size: 96rpx;
+	font-weight: 800;
+	color: #DC2626;
+	line-height: 1;
+}
+
+.st-ratio-pct {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #F87171;
+	margin-left: 4rpx;
+}
+
+.st-ratio-bar {
+	height: 16rpx;
+	background: #FEE2E2;
+	border-radius: 8rpx;
+	overflow: hidden;
+	margin: 0 40rpx;
+}
+
+.st-ratio-bar-fill {
+	height: 100%;
+	background: linear-gradient(90deg, #DC2626, #EF4444, #F87171);
+	border-radius: 8rpx;
+	transition: width 0.8s ease;
+	min-width: 4rpx;
+}
+
+.st-ratio-meta {
+	display: flex;
+	justify-content: space-between;
+	margin: 16rpx 40rpx 0;
+}
+
+.st-ratio-meta-item {
+	font-size: 22rpx;
+	color: #94A3B8;
+}
+
+/* ==================== 水平条形图 ==================== */
+
+.st-h-bars {
+	display: flex;
+	flex-direction: column;
+	gap: 20rpx;
+}
+
+.st-hbar-row {
+	display: flex;
+	align-items: center;
+	gap: 12rpx;
+}
+
+.st-hbar-rank {
+	width: 36rpx;
+	height: 36rpx;
+	line-height: 36rpx;
+	text-align: center;
+	font-size: 20rpx;
+	font-weight: 700;
+	color: #FFFFFF;
+	background: #CBD5E1;
+	border-radius: 8rpx;
+	flex-shrink: 0;
+}
+
+.st-hbar-row:first-child .st-hbar-rank { background: #DC2626; }
+.st-hbar-row:nth-child(2) .st-hbar-rank { background: #F59E0B; }
+.st-hbar-row:nth-child(3) .st-hbar-rank { background: #2563EB; }
+
+.st-hbar-name {
+	width: 140rpx;
+	font-size: 24rpx;
+	color: #0F172A;
+	flex-shrink: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 500;
+}
+
+.st-hbar-name-kw { width: 130rpx; }
+
+.st-hbar-track {
+	flex: 1;
+	height: 24rpx;
+	background: #F1F5F9;
+	border-radius: 6rpx;
+	overflow: hidden;
+}
+
+.st-hbar-fill {
+	height: 100%;
+	border-radius: 6rpx;
+	min-width: 8rpx;
+	animation: widthGrow 0.8s ease-out both;
+}
+
+.st-hbar-fill-blue { background: linear-gradient(90deg, #2563EB, #60A5FA); }
+.st-hbar-fill-red { background: linear-gradient(90deg, #DC2626, #F87171); }
+.st-hbar-fill-teal { background: linear-gradient(90deg, #0891B2, #22D3EE); }
+
+.st-hbar-val {
+	width: 60rpx;
+	font-size: 24rpx;
+	font-weight: 700;
+	color: #475569;
+	text-align: right;
+	flex-shrink: 0;
+}
+
+/* ==================== 骨架屏补充 ==================== */
+
+.sk-card {
+	background: #FFFFFF;
+	border-radius: 16rpx;
+	padding: 28rpx;
+	margin-bottom: 20rpx;
+}
