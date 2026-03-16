@@ -2,16 +2,19 @@ var sources = [
 	{
 		id: "ccgp",
 		name: "中国政府采购网",
-		baseUrl: "http://search.ccgp.gov.cn/bxsearch",
+		baseUrl: "https://search.ccgp.gov.cn/bxsearch",
 		website: "https://www.ccgp.gov.cn",
 		description: "全国政府采购信息发布指定媒体，覆盖全国各省市",
 		params: {
 			searchtype: "1",
 			bidSort: "0",
+			buyerName: "",
+			projectId: "",
 			pinMu: "0",
 			bidType: "0",
 			dbselect: "bidx",
-			pppStatus: "0"
+			pppStatus: "0",
+			agentName: ""
 		},
 		bidTypes: [
 			{ value: "1", label: "公开招标" },

@@ -51,8 +51,8 @@ CcgpCrawler.prototype.crawl = function(options) {
 	var kw = opts.kw !== undefined ? opts.kw : "耗材";
 	var region = opts.region || "四川";
 	var zoneInfo = ZONE_MAP[region] || ZONE_MAP["四川"];
-	var dateFrom = opts.start_time ? formatCcgpDate(opts.start_time) : formatCcgpDate(getDefaultDateStr(-7));
-	var dateTo = opts.end_time ? formatCcgpDate(opts.end_time) : formatCcgpDate(getDefaultDateStr(0));
+	var dateFrom = opts.start_time || getDefaultDateStr(-7);
+	var dateTo = opts.end_time || getDefaultDateStr(0);
 	var timeType = opts.timeType || "2";
 	var maxPages = opts.maxPages || 15;
 
@@ -74,32 +74,16 @@ function crawlPages(crawler, kw, zoneInfo, dateFrom, dateTo, timeType, maxPages,
 	var resolvedMaxPages = null;
 
 	function crawlPage(page) {
-		var params = Object.assign({}, crawler.config.params, {
-			kw: kw,
-			start_time: dateFrom,
-			end_time: dateTo,
-			timeType: timeType,
-			page_index: String(page),
-			displayZone: zoneInfo.displayZone,
-			zoneId: zoneInfo.zoneId
-		});
-
 		console.log("[CCGP] 正在抓取第" + page + "页");
 
-		return crawler.fetch(crawler.config.baseUrl, {
-			params: params,
+		var url = buildCcgpUrl(crawler.config.baseUrl, kw, zoneInfo, dateFrom, dateTo, timeType, page);
+
+		return crawler.fetch(url, {
 			headers: {
-				"Referer": "http://search.ccgp.gov.cn/"
+				"Referer": "https://search.ccgp.gov.cn/"
 			}
 		}).then(function(response) {
 			var html = response.data;
-
-			if (html.indexOf("频繁访问") !== -1 || html.indexOf("验证码") !== -1) {
-				var msg = "CCGP反爬拦截：云函数IP被限制访问，请稍后重试";
-				console.error("[CCGP] " + msg);
-				partialErrors.push(msg);
-				return items;
-			}
 
 			var $ = cheerio.load(html);
 
@@ -145,13 +129,26 @@ function crawlPages(crawler, kw, zoneInfo, dateFrom, dateTo, timeType, maxPages,
 	return crawlPage(1);
 }
 
+// 每页固定 20 条
+var ITEMS_PER_PAGE = 20;
+
 function parseTotalPages($) {
-	var text = $(".pager").text();
-	var match = text.match(/共\s*(\d+)\s*页/);
-	if (match) return parseInt(match[1]);
+	// 优先从「共找到 X 条内容」解析总条数，再除以每页条数得到总页数
+	// 目标页面无总页数字符，只有该 HTML 片段
+	var bodyText = $("body").text();
+	var countMatch = bodyText.match(/共找到\s*(\d+)\s*条内容/);
+	if (countMatch) {
+		var totalCount = parseInt(countMatch[1], 10);
+		return Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
+	}
+	// 兼容旧版：尝试从 .pager 解析「共 X 页」
+	var pagerText = $(".pager").text();
+	var pageMatch = pagerText.match(/共\s*(\d+)\s*页/);
+	if (pageMatch) return parseInt(pageMatch[1], 10);
+	// 兜底：从分页链接取最大页码
 	var max = 1;
 	$(".pager a").each(function() {
-		var n = parseInt($(this).text().trim());
+		var n = parseInt($(this).text().trim(), 10);
 		if (!isNaN(n) && n > max) max = n;
 	});
 	return max;
@@ -245,9 +242,30 @@ function cleanText(text) {
 	return text.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
-// 将 YYYY-MM-DD 转为 CCGP 接口要求的 YYYY%3AMM%3ADD
-function formatCcgpDate(dateStr) {
-	return dateStr.replace(/-/g, "%3A");
+// 手动拼接完整的 CCGP 搜索 URL，保证参数顺序和编码与网站完全一致
+// 日期用 %3A 作为冒号（CCGP 接口要求），kw/displayZone 用 encodeURIComponent
+function buildCcgpUrl(baseUrl, kw, zoneInfo, dateFrom, dateTo, timeType, page) {
+	var startEncoded = dateFrom.replace(/-/g, "%3A");
+	var endEncoded = dateTo.replace(/-/g, "%3A");
+	var query = [
+		"searchtype=1",
+		"page_index=" + page,
+		"bidSort=0",
+		"buyerName=",
+		"projectId=",
+		"pinMu=0",
+		"bidType=0",
+		"dbselect=bidx",
+		"kw=" + encodeURIComponent(kw),
+		"start_time=" + startEncoded,
+		"end_time=" + endEncoded,
+		"timeType=" + timeType,
+		"displayZone=" + encodeURIComponent(zoneInfo.displayZone),
+		"zoneId=" + zoneInfo.zoneId,
+		"pppStatus=0",
+		"agentName="
+	].join("&");
+	return baseUrl + "?" + query;
 }
 
 // 生成相对今日 offsetDays 天的 YYYY-MM-DD 字符串
