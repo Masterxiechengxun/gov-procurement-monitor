@@ -33,10 +33,7 @@ var DEFAULT_KEYWORDS = {
 
 var DEFAULT_SCHEDULE = {
 	enabled: true,
-	intervalHours: 24,
-	dayType: "all",
-	startHour: 6,
-	startMinute: 0
+	dayType: "all"
 };
 
 var DEFAULT_RETENTION_DAYS = 90;
@@ -558,7 +555,6 @@ function handleAnalytics(event, context, openid) {
 						total: total,
 						chemical: chemical,
 						todayNew: todayNew,
-						activeSources: sourceDist.length,
 						catCounts: catCounts
 					},
 					dailyTrend: dailyTrend,
@@ -734,8 +730,9 @@ function buildWhere(event) {
 	}
 
 	if (event.keyword) {
+		var escaped = event.keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 		where.title = db.RegExp({
-			regexp: event.keyword,
+			regexp: escaped,
 			options: "i"
 		});
 	}

@@ -195,9 +195,6 @@ function parseCcgpList($, config, kw, regionLabel) {
 			agent: info.agent || "",
 			bidType: info.bidType || "",
 			kw: kw,
-			contentHtml: null,
-			fetchRetryCount: 0,
-			detailFetchedAt: null
 			// crawledAt 由 index.js 的 deduplicateAndSave 统一写入，此处无需重复设置
 		});
 	});

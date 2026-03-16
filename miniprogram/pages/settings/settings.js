@@ -37,12 +37,9 @@ Page({
 
 		schedule: {
 			enabled: true,
-			intervalHours: 1,
 			dayType: "all"
 		},
 		scheduleLoaded: false,
-		intervalOptions: [1, 2, 4, 6, 8, 12, 24],
-		intervalIndex: 0,
 		dayTypeOptions: ["每天", "仅工作日", "仅周末"],
 		dayTypeIndex: 0,
 
@@ -282,16 +279,11 @@ Page({
 		var self = this;
 		api.getSchedule().then(function(data) {
 			if (data && typeof data === "object") {
-				var intervalIdx = self.data.intervalOptions.indexOf(data.intervalHours);
-				if (intervalIdx === -1) {
-					intervalIdx = 0;
-				}
 				var dayMap = { "all": 0, "workday": 1, "weekend": 2 };
 				var dayIdx = (dayMap[data.dayType] !== undefined) ? dayMap[data.dayType] : 0;
 				self.setData({
 					schedule: data,
 					scheduleLoaded: true,
-					intervalIndex: intervalIdx,
 					dayTypeIndex: dayIdx
 				});
 			} else {
@@ -305,15 +297,6 @@ Page({
 
 	toggleScheduleEnabled: function(e) {
 		this.setData({ "schedule.enabled": e.detail.value });
-		this.saveSchedule();
-	},
-
-	onIntervalChange: function(e) {
-		var idx = parseInt(e.detail.value, 10);
-		this.setData({
-			intervalIndex: idx,
-			"schedule.intervalHours": this.data.intervalOptions[idx]
-		});
 		this.saveSchedule();
 	},
 

@@ -170,7 +170,7 @@ Page({
 
 		return api.getList(params).then(function(data) {
 			var newList = data.list || [];
-			var currentList = refresh ? [] : self.data.list;
+			var currentList = refresh ? [] : self.data.list.slice();
 
 			for (var i = 0; i < newList.length; i++) {
 				currentList.push(newList[i]);

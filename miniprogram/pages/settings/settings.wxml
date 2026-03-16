@@ -65,7 +65,7 @@
 		</view>
 	</view>
 
-	<!-- 自动抓取策略 -->
+	<!-- 自动抓取 -->
 	<view class="se-card anim-fade-up anim-d2">
 		<view class="se-card-head">
 			<view class="se-icon-wrap se-icon-schedule">
@@ -78,59 +78,25 @@
 				</view>
 			</view>
 			<view>
-				<text class="se-card-title">自动抓取策略</text>
-				<text class="se-card-desc">云函数定时触发，可控制执行频率</text>
+				<text class="se-card-title">自动抓取</text>
+				<text class="se-card-desc">每天定时抓取，可设置运行日期</text>
 			</view>
 		</view>
 
-		<!-- 系统触发器（只读） -->
-		<view class="se-subsection">
-			<view class="se-subsection-hd">
-				<text class="se-subsection-title">系统触发器</text>
-				<text class="se-badge se-badge-sys">系统固定</text>
-			</view>
-			<view class="se-trigger-row">
-				<text class="se-trigger-name">列表抓取</text>
-				<text class="se-trigger-val">每小时整点</text>
-			</view>
-			<view class="se-trigger-row">
-				<text class="se-trigger-name">详情补抓</text>
-				<text class="se-trigger-val">每小时第 5 分钟</text>
-			</view>
-			<view class="se-trigger-row se-trigger-row-last">
-				<text class="se-trigger-name">数据清理</text>
-				<text class="se-trigger-val">每周日凌晨 3 点</text>
-			</view>
+		<view class="se-row">
+			<text class="se-row-label">启用自动抓取</text>
+			<switch checked="{{schedule.enabled}}" bindchange="toggleScheduleEnabled" color="#2563EB" />
+		</view>
+		<view class="se-row se-row-last {{!schedule.enabled ? 'se-row-dim' : ''}}">
+			<text class="se-row-label">运行日期</text>
+			<picker range="{{dayTypeOptions}}" value="{{dayTypeIndex}}" bindchange="onDayTypeChange" disabled="{{!schedule.enabled}}">
+				<view class="se-picker {{!schedule.enabled ? 'se-picker-dim' : ''}}">{{dayTypeOptions[dayTypeIndex]}}</view>
+			</picker>
 		</view>
 
-		<!-- 执行控制（可编辑） -->
-		<view class="se-subsection se-subsection-ctrl">
-			<view class="se-subsection-hd">
-				<text class="se-subsection-title">执行控制</text>
-				<text class="se-badge se-badge-ctrl">可自定义</text>
-			</view>
-			<view class="se-row">
-				<text class="se-row-label">启用自动抓取</text>
-				<switch checked="{{schedule.enabled}}" bindchange="toggleScheduleEnabled" color="#2563EB" />
-			</view>
-			<view class="se-row {{!schedule.enabled ? 'se-row-dim' : ''}}">
-				<text class="se-row-label">抓取间隔</text>
-				<picker range="{{intervalOptions}}" value="{{intervalIndex}}" bindchange="onIntervalChange" disabled="{{!schedule.enabled}}">
-					<view class="se-picker {{!schedule.enabled ? 'se-picker-dim' : ''}}">每 {{intervalOptions[intervalIndex]}} 小时</view>
-				</picker>
-			</view>
-			<view class="se-row se-row-last {{!schedule.enabled ? 'se-row-dim' : ''}}">
-				<text class="se-row-label">执行日期</text>
-				<picker range="{{dayTypeOptions}}" value="{{dayTypeIndex}}" bindchange="onDayTypeChange" disabled="{{!schedule.enabled}}">
-					<view class="se-picker {{!schedule.enabled ? 'se-picker-dim' : ''}}">{{dayTypeOptions[dayTypeIndex]}}</view>
-				</picker>
-			</view>
-		</view>
-
-		<!-- 当前生效摘要 -->
 		<view class="se-schedule-summary {{schedule.enabled ? 'se-schedule-summary-on' : ''}}">
-			<text wx:if="{{schedule.enabled}}">当前策略：{{dayTypeOptions[dayTypeIndex]}}，每 {{intervalOptions[intervalIndex]}} 小时触发一次抓取</text>
-			<text wx:else>自动抓取已关闭，仅支持手动触发</text>
+			<text wx:if="{{schedule.enabled}}">{{dayTypeOptions[dayTypeIndex]}}自动运行</text>
+			<text wx:else>已暂停，仅支持手动触发</text>
 		</view>
 	</view>
 

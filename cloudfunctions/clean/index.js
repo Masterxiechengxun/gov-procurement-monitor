@@ -53,17 +53,20 @@ exports.main = function(event, context) {
 			return deleteBatch()
 				.then(function(count) {
 					return cleanOldLogs(cutoffStr).then(function(logCount) {
-						console.log("[Clean] 清理完成: 采购信息 " + count + " 条, 日志 " + logCount + " 条");
-						return {
-							code: 0,
-							message: "清理完成",
-							data: {
-								procurementsDeleted: count,
-								logsDeleted: logCount,
-								retentionDays: retentionDays,
-								cutoffDate: cutoffStr
-							}
-						};
+						return cleanStaleFields().then(function(fieldCount) {
+							console.log("[Clean] 清理完成: 采购信息 " + count + " 条, 日志 " + logCount + " 条, 无用字段 " + fieldCount + " 条");
+							return {
+								code: 0,
+								message: "清理完成",
+								data: {
+									procurementsDeleted: count,
+									logsDeleted: logCount,
+									staleFieldsCleaned: fieldCount,
+									retentionDays: retentionDays,
+									cutoffDate: cutoffStr
+								}
+							};
+						});
 					});
 				});
 		})
@@ -168,4 +171,25 @@ function formatDate(date) {
 	var m = date.getMonth() + 1;
 	var d = date.getDate();
 	return y + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d);
+}
+
+function cleanStaleFields() {
+	return db.collection("procurements")
+		.where({ contentHtml: _.exists(true) })
+		.update({
+			data: {
+				contentHtml: _.remove(),
+				fetchRetryCount: _.remove(),
+				detailFetchedAt: _.remove()
+			}
+		})
+		.then(function(res) {
+			var count = (res.stats && res.stats.updated) ? res.stats.updated : 0;
+			console.log("[Clean] 清理无用字段 " + count + " 条");
+			return count;
+		})
+		.catch(function(err) {
+			console.warn("[Clean] 清理无用字段失败:", err.message);
+			return 0;
+		});
 }

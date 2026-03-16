@@ -216,13 +216,10 @@ function checkSchedule() {
 			}
 
 			var now = getChinaTime();
-			var currentHour = now.getHours();
 			var currentDay = now.getDay();
 			var isWeekend = currentDay === 0 || currentDay === 6;
 
 			var anyEnabled = false;
-			var shouldRunByHour = false;
-			var minInterval = 24;
 
 			for (var i = 0; i < res.data.length; i++) {
 				var schedule = res.data[i].value;
@@ -238,72 +235,20 @@ function checkSchedule() {
 					continue;
 				}
 
-				var interval = schedule.intervalHours || 24;
-				if (interval < minInterval) {
-					minInterval = interval;
-				}
-
-				if (isMatchingHour(currentHour, schedule)) {
-					shouldRunByHour = true;
-				}
+				return true;
 			}
 
 			if (!anyEnabled) {
 				console.log("[Crawl] 所有用户均已禁用自动抓取");
-				return false;
+			} else {
+				console.log("[Crawl] 今日不满足任何用户的执行日期设置");
 			}
-
-			if (!shouldRunByHour) {
-				console.log("[Crawl] 当前时间不匹配任何用户的执行小时");
-				return false;
-			}
-
-			var realNow = new Date();
-			return db.collection("crawl_log")
-				.orderBy("createdAt", "desc")
-				.limit(1)
-				.get()
-				.then(function(logRes) {
-					if (logRes.data.length === 0) {
-						return true;
-					}
-
-					var lastCrawlTime = logRes.data[0].createdAt;
-					if (typeof lastCrawlTime === "string") {
-						lastCrawlTime = new Date(lastCrawlTime);
-					}
-					var hoursSinceLast = (realNow.getTime() - lastCrawlTime.getTime()) / 3600000;
-
-					if (hoursSinceLast < minInterval - 0.5) {
-						console.log("[Crawl] 距上次抓取 " + Math.round(hoursSinceLast * 10) / 10 + " 小时，不足最小间隔 " + minInterval + " 小时");
-						return false;
-					}
-
-					return true;
-				});
+			return false;
 		})
 		.catch(function(err) {
 			console.warn("[Crawl] 检查抓取策略失败，默认执行:", err.message);
 			return true;
 		});
-}
-
-function isMatchingHour(currentHour, schedule) {
-	var startHour = schedule.startHour;
-	if (typeof startHour !== "number") {
-		startHour = 6;
-	}
-	var intervalHours = schedule.intervalHours || 24;
-
-	if (intervalHours >= 24) {
-		return currentHour === startHour;
-	}
-
-	var diff = currentHour - startHour;
-	if (diff < 0) {
-		diff += 24;
-	}
-	return diff % intervalHours === 0;
 }
 
 function getChinaTime() {

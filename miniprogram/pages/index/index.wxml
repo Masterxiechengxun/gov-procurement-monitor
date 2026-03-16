@@ -95,6 +95,7 @@
 			<view class="loading-dot"></view>
 			<view class="loading-dot loading-dot-2"></view>
 			<view class="loading-dot loading-dot-3"></view>
+			<text class="loading-more-txt">加载中</text>
 		</view>
 
 		<!-- 空白状态 -->
@@ -117,10 +118,10 @@
 			</view>
 		</view>
 
-		<!-- 已加载全部 -->
+		<!-- 没有更多了 -->
 		<view wx:if="{{!loading && noMore && list.length > 0}}" class="list-end">
 			<view class="list-end-line"></view>
-			<text class="list-end-txt">已加载全部</text>
+			<text class="list-end-txt">没有更多了</text>
 			<view class="list-end-line"></view>
 		</view>
 	</view>

@@ -9,8 +9,7 @@ Page({
 		overview: {
 			total: 0,
 			chemical: 0,
-			todayNew: 0,
-			activeSources: 0
+			todayNew: 0
 		},
 		dailyTrend: [],
 		catRatios: [],

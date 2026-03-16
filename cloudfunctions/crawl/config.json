@@ -1,13 +1,14 @@
 {
-	"timeout": 6000,
+	"timeout": 900,
+	"memorySize": 1024,
 	"permissions": {
 		"openapi": []
 	},
 	"triggers": [
 		{
-			"name": "hourlyTrigger",
+			"name": "dailyTrigger",
 			"type": "timer",
-			"config": "0 0 * * * * *"
+			"config": "0 0 6 * * * *"
 		}
 	]
 }
