@@ -7,7 +7,7 @@ Page({
 		sourceList: [],
 		followedCats: [],
 		keywordCategories: {},
-		selectedCats: {},
+		selectedCategory: "",
 		dateOptions: [
 			{ value: "all", label: "全部" },
 			{ value: "today", label: "今天" },
@@ -26,16 +26,64 @@ Page({
 
 	onLoad: function() {
 		var cats = config.getFollowedCategories();
-		var selected = {};
-		for (var i = 0; i < cats.length; i++) {
-			selected[cats[i]] = false;
-		}
 		this.setData({
 			sourceList: config.getDisplaySources(),
-			followedCats: cats,
-			selectedCats: selected
+			followedCats: cats
 		});
 		this.loadKeywords();
+		this.syncFromIndexPage();
+	},
+
+	// 从首页同步当前筛选状态，实现筛选表单与首页联动
+	syncFromIndexPage: function() {
+		var pages = getCurrentPages();
+		if (pages.length < 2) return;
+		var indexPage = pages[pages.length - 2];
+		if (!indexPage || indexPage.route !== "pages/index/index") return;
+
+		var idx = indexPage.data;
+		var selectedSource = idx.currentSource || "";
+		var fp = idx.filterParams || {};
+		var keyword = fp.keyword || "";
+		var dateFrom = fp.dateFrom || "";
+		var dateTo = fp.dateTo || "";
+		var selectedDateOption = "all";
+		var today = util.formatDate(new Date());
+
+		// 根据 currentTab 判断日期
+		if (idx.currentTab === "today") {
+			selectedDateOption = "today";
+			dateFrom = today;
+			dateTo = today;
+		} else if (dateFrom && dateTo) {
+			if (dateFrom === today && dateTo === today) {
+				selectedDateOption = "today";
+			} else if (dateFrom === util.daysAgo(3)) {
+				selectedDateOption = "3days";
+			} else if (dateFrom === util.daysAgo(7)) {
+				selectedDateOption = "7days";
+			} else if (dateFrom === util.daysAgo(30)) {
+				selectedDateOption = "30days";
+			} else {
+				selectedDateOption = "custom";
+			}
+		}
+
+		// 根据 currentTab 还原分类单选（与首页 Tab 一致）
+		var selectedCategory = "";
+		var tab = idx.currentTab;
+		if (tab && tab.indexOf("cat:") === 0) {
+			selectedCategory = tab.substring(4);
+		}
+
+		this.setData({
+			selectedSource: selectedSource,
+			selectedDateOption: selectedDateOption,
+			dateFrom: dateFrom,
+			dateTo: dateTo,
+			keyword: keyword,
+			selectedCategory: selectedCategory
+		});
 	},
 
 	loadKeywords: function() {
@@ -55,13 +103,15 @@ Page({
 		var value = e.currentTarget.dataset.value;
 		this.setData({ selectedDateOption: value });
 
-		if (value !== "custom") {
-			var dates = this.calcDateRange(value);
-			this.setData({
-				dateFrom: dates.from,
-				dateTo: dates.to
-			});
+		if (value === "custom") {
+			// 自定义日期由用户后续选择，此处不预设
+			return;
 		}
+		var dates = this.calcDateRange(value);
+		this.setData({
+			dateFrom: dates.from,
+			dateTo: dates.to
+		});
 	},
 
 	onDateFromChange: function(e) {
@@ -72,10 +122,8 @@ Page({
 		this.setData({ dateTo: e.detail.value });
 	},
 
-	onCatToggle: function(e) {
-		var cat = e.currentTarget.dataset.cat;
-		var key = "selectedCats." + cat;
-		this.setData({ [key]: e.detail.value });
+	onSelectCategory: function(e) {
+		this.setData({ selectedCategory: e.currentTarget.dataset.cat });
 	},
 
 	onKeywordInput: function(e) {
@@ -91,6 +139,10 @@ Page({
 		var from = "";
 		var to = today;
 
+		if (option === "all") {
+			// 「全部」不限制日期，传空字符串
+			return { from: "", to: "" };
+		}
 		if (option === "today") {
 			from = today;
 		} else if (option === "3days") {
@@ -105,64 +157,50 @@ Page({
 	},
 
 	onReset: function() {
-		var cats = this.data.followedCats;
-		var selected = {};
-		for (var i = 0; i < cats.length; i++) {
-			selected[cats[i]] = false;
-		}
 		this.setData({
 			selectedSource: "",
 			selectedDateOption: "all",
 			dateFrom: "",
 			dateTo: "",
-			selectedCats: selected,
+			selectedCategory: "",
 			keyword: ""
 		});
 	},
 
 	onApply: function() {
-		var selectedCategories = [];
-		var cats = this.data.followedCats;
-		var sel = this.data.selectedCats;
-		var kwCfg = this.data.keywordCategories;
-		for (var i = 0; i < cats.length; i++) {
-			if (sel[cats[i]]) {
-				selectedCategories.push(cats[i]);
-			}
-		}
+		var pages = getCurrentPages();
+		var selectedCategory = this.data.selectedCategory || "";
+		// 单选分类：通过 currentTab 与首页 Tab 联动，无需 matchKeywords
+		var currentTab = selectedCategory ? "cat:" + selectedCategory : "all";
 
-		var matchKeywords = [];
-		for (var j = 0; j < selectedCategories.length; j++) {
-			var words = kwCfg[selectedCategories[j]];
-			if (words && words.length > 0) {
-				for (var k = 0; k < words.length; k++) {
-					if (matchKeywords.indexOf(words[k]) === -1) {
-						matchKeywords.push(words[k]);
-					}
-				}
-			}
+		// 「全部」或「自定义」未选完日期时，不传日期限制
+		var dateFrom = this.data.dateFrom || "";
+		var dateTo = this.data.dateTo || "";
+		if (this.data.selectedDateOption === "all" || (this.data.selectedDateOption === "custom" && (!dateFrom || !dateTo))) {
+			dateFrom = "";
+			dateTo = "";
 		}
 
 		var params = {
-			source: this.data.selectedSource,
-			selectedCategories: selectedCategories,
-			matchKeywords: matchKeywords,
+			source: this.data.selectedSource || "",
+			selectedCategories: selectedCategory ? [selectedCategory] : [],
+			matchKeywords: [],
 			chemicalOnly: false,
-			keyword: this.data.keyword,
-			dateFrom: this.data.dateFrom,
-			dateTo: this.data.dateTo
+			keyword: (this.data.keyword || "").trim(),
+			dateFrom: dateFrom,
+			dateTo: dateTo
 		};
 
-		var pages = getCurrentPages();
 		if (pages.length >= 2) {
 			var indexPage = pages[pages.length - 2];
 			indexPage.setData({
 				_filterResult: params,
-				currentSource: params.source,
+				currentSource: params.source || "",
 				filterParams: params,
-				currentTab: "all"
+				currentTab: currentTab
+			}, function() {
+				indexPage.loadList(true);
 			});
-			indexPage.loadList(true);
 		}
 
 		wx.navigateBack();

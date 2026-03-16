@@ -52,12 +52,26 @@
 		</view>
 	</view>
 
-	<!-- 内容筛选 -->
+	<!-- 内容筛选（单选，与首页 Tab 一致） -->
 	<view class="fl-section anim-fade-up anim-d2">
 		<text class="fl-sec-title">内容筛选</text>
-		<view wx:for="{{followedCats}}" wx:key="*this" class="fl-switch-row {{index === followedCats.length - 1 ? 'fl-switch-row-last' : ''}}">
-			<text class="fl-switch-label">仅看{{item}}相关</text>
-			<switch checked="{{selectedCats[item]}}" bindchange="onCatToggle" data-cat="{{item}}" color="#2563EB" />
+		<view class="fl-options">
+			<view
+				class="fl-opt {{selectedCategory === '' ? 'fl-opt-on' : ''}}"
+				bindtap="onSelectCategory"
+				data-cat=""
+			>
+				<text>全部</text>
+			</view>
+			<view
+				wx:for="{{followedCats}}"
+				wx:key="*this"
+				class="fl-opt {{selectedCategory === item ? 'fl-opt-on' : ''}}"
+				bindtap="onSelectCategory"
+				data-cat="{{item}}"
+			>
+				<text>{{item}}</text>
+			</view>
 		</view>
 	</view>
 

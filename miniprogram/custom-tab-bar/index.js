@@ -5,20 +5,20 @@ Component({
 			{
 				pagePath: "/pages/index/index",
 				text: "采购信息",
-				icon: "/images/tab-cart.png",
-				activeIcon: "/images/tab-cart-active.png"
+				icon: "/images/tab-cart.svg",
+				activeIcon: "/images/tab-cart-active.svg"
 			},
 			{
 				pagePath: "/pages/stats/stats",
 				text: "数据统计",
-				icon: "/images/tab-chart.png",
-				activeIcon: "/images/tab-chart-active.png"
+				icon: "/images/tab-chart.svg",
+				activeIcon: "/images/tab-chart-active.svg"
 			},
 			{
 				pagePath: "/pages/settings/settings",
 				text: "我的设置",
-				icon: "/images/tab-gear.png",
-				activeIcon: "/images/tab-gear-active.png"
+				icon: "/images/tab-gear.svg",
+				activeIcon: "/images/tab-gear-active.svg"
 			}
 		]
 	},

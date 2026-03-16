@@ -3,15 +3,15 @@
 	<view class="stats-header anim-fade-in">
 		<scroll-view class="stats-scroll" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
 			<view class="stats-row">
-				<view class="stat-card">
+				<view class="stat-card {{currentTab === 'all' ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="all">
 					<text class="stat-val">{{stats.total}}</text>
 					<text class="stat-lbl">采购总量</text>
 				</view>
-				<view class="stat-card stat-card-accent">
+				<view class="stat-card stat-card-accent {{currentTab === 'today' ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="today">
 					<text class="stat-val">{{stats.todayNew}}</text>
 					<text class="stat-lbl">今日新增</text>
 				</view>
-			<view wx:for="{{stats.catCounts}}" wx:key="name" class="stat-card {{item.colorClass}}">
+			<view wx:for="{{stats.catCounts}}" wx:key="name" class="stat-card {{item.colorClass}} {{currentTab === 'cat:' + item.name ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="cat:{{item.name}}">
 				<text class="stat-val">{{item.count}}</text>
 				<text class="stat-lbl">{{item.name}}</text>
 			</view>

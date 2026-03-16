@@ -199,6 +199,16 @@ Page({
 		this.loadList(true);
 	},
 
+	// 点击顶部统计卡片时切换筛选条件
+	onStatCardTap: function(e) {
+		var tab = e.currentTarget.dataset.tab;
+		if (tab === this.data.currentTab) {
+			return;
+		}
+		this.setData({ currentTab: tab, filterParams: {} });
+		this.loadList(true);
+	},
+
 	onSourceChange: function(e) {
 		var source = e.currentTarget.dataset.source;
 		if (source === this.data.currentSource) {
