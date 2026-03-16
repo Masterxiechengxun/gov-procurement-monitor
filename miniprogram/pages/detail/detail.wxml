@@ -1,83 +1,19 @@
-<view class="page" wx:if="{{detail}}">
-	<!-- 标签区 -->
-	<view class="dt-tags anim-fade-in">
-		<view wx:if="{{detail.isNew}}" class="tag tag-new"><text>NEW</text></view>
-		<view wx:if="{{detail.isChemical && followedCats.length > 0}}" class="tag tag-chemical"><text>{{followedCats[0]}}</text></view>
-		<view class="tag tag-source"><text>{{detail.sourceName}}</text></view>
-		<view wx:if="{{detail.bidType}}" class="tag tag-bid"><text>{{detail.bidType}}</text></view>
-	</view>
+<!-- 自定义导航栏：cover-view 可覆盖在 web-view 之上 -->
+<cover-view class="nav-bar" style="height:{{navHeight}}px">
+	<cover-view class="nav-status" style="height:{{statusBarHeight}}px"></cover-view>
+	<cover-view class="nav-actions">
+		<cover-view class="nav-btn nav-btn-left" bindtap="goBack">‹ 返回</cover-view>
+		<cover-view class="nav-title">{{title}}</cover-view>
+		<cover-view class="nav-btn nav-btn-right" bindtap="openInBrowser">浏览器</cover-view>
+	</cover-view>
+</cover-view>
 
-	<!-- 标题 -->
-	<text class="dt-title anim-fade-up anim-d1">{{detail.title}}</text>
+<!-- web-view 铺满全屏，cover-view 导航栏浮于其上 -->
+<web-view wx:if="{{url && !error}}" src="{{url}}"></web-view>
 
-	<!-- 信息卡片 -->
-	<view class="dt-info-card anim-fade-up anim-d2">
-		<view wx:if="{{detail.publishDate}}" class="dt-row">
-			<view class="dt-row-icon dt-icon-date"></view>
-			<text class="dt-row-label">发布日期</text>
-			<text class="dt-row-val">{{detail.publishDate}}</text>
-		</view>
-		<view wx:if="{{detail.buyer}}" class="dt-row">
-			<view class="dt-row-icon dt-icon-buyer"></view>
-			<text class="dt-row-label">采购人</text>
-			<text class="dt-row-val">{{detail.buyer}}</text>
-		</view>
-		<view wx:if="{{detail.agent}}" class="dt-row">
-			<view class="dt-row-icon dt-icon-agent"></view>
-			<text class="dt-row-label">代理机构</text>
-			<text class="dt-row-val">{{detail.agent}}</text>
-		</view>
-		<view wx:if="{{detail.region}}" class="dt-row">
-			<view class="dt-row-icon dt-icon-region"></view>
-			<text class="dt-row-label">所在地区</text>
-			<text class="dt-row-val">{{detail.region}}</text>
-		</view>
-		<view wx:if="{{detail.source}}" class="dt-row dt-row-last">
-			<view class="dt-row-icon dt-icon-source"></view>
-			<text class="dt-row-label">信息来源</text>
-			<text class="dt-row-val">{{detail.sourceName}}</text>
-		</view>
-	</view>
-
-	<!-- 匹配关键词 -->
-	<view wx:if="{{detail.isChemical && detail.matchedKeywords.length > 0}}" class="dt-section anim-fade-up anim-d3">
-		<text class="dt-sec-title">匹配的关注分类关键词</text>
-		<view class="dt-kw-list">
-			<view wx:for="{{detail.matchedKeywords}}" wx:key="*this" class="dt-kw-chip">
-				<text>{{item}}</text>
-			</view>
-		</view>
-	</view>
-
-	<!-- 原文链接 -->
-	<view class="dt-section anim-fade-up anim-d4">
-		<text class="dt-sec-title">原文链接</text>
-		<view class="dt-link-box">
-			<text class="dt-link-url" selectable="true">{{detail.url}}</text>
-		</view>
-		<view class="dt-copy-btn" bindtap="copyLink">
-			<view class="dt-copy-icon"></view>
-			<text>复制链接到剪贴板</text>
-		</view>
-		<text class="dt-link-tip">复制后在微信对话框粘贴，即可用浏览器打开</text>
-	</view>
-</view>
-
-<!-- 加载态 -->
-<view wx:if="{{loading}}" class="dt-loading">
-	<view class="loading-wrap">
-		<view class="loading-dot"></view>
-		<view class="loading-dot loading-dot-2"></view>
-		<view class="loading-dot loading-dot-3"></view>
-	</view>
-	<text class="dt-loading-txt">加载中</text>
-</view>
-
-<!-- 错误态 -->
-<view wx:if="{{error}}" class="dt-error">
-	<view class="dt-err-icon"></view>
-	<text class="dt-err-txt">{{error}}</text>
-	<view class="btn-primary" style="width:300rpx;margin-top:40rpx;" bindtap="reload">
-		<text>重新加载</text>
-	</view>
+<!-- 错误态（无 url 时） -->
+<view wx:if="{{error}}" class="err-wrap" style="padding-top:{{navHeight}}px">
+	<view class="err-icon"></view>
+	<text class="err-txt">{{error}}</text>
+	<view class="err-back-btn" bindtap="goBack">返回</view>
 </view>

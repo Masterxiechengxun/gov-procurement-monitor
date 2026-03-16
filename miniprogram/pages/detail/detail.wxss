@@ -1,200 +1,92 @@
-.page {
-	min-height: 100vh;
-	background: #F1F5F9;
-	padding: 24rpx;
-	padding-bottom: 80rpx;
-}
+/* ==================== 自定义导航栏（cover-view） ==================== */
 
-/* ==================== 标签区 ==================== */
-
-.dt-tags {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 10rpx;
-	margin-bottom: 20rpx;
-}
-
-/* ==================== 标题 ==================== */
-
-.dt-title {
-	display: block;
-	font-size: 36rpx;
-	font-weight: 700;
-	color: #0F172A;
-	line-height: 1.55;
-	margin-bottom: 28rpx;
-}
-
-/* ==================== 信息卡片 ==================== */
-
-.dt-info-card {
+.nav-bar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
 	background: #FFFFFF;
-	border-radius: 16rpx;
-	padding: 8rpx 0;
-	margin-bottom: 24rpx;
-	box-shadow: 0 2rpx 12rpx rgba(15, 23, 42, 0.04);
+	z-index: 9999;
+	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
 }
 
-.dt-row {
+.nav-status {
+	width: 100%;
+}
+
+.nav-actions {
+	height: 44px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-btn {
+	width: 110rpx;
+	height: 44px;
 	display: flex;
 	align-items: center;
-	padding: 18rpx 28rpx;
-	border-bottom: 1rpx solid #F1F5F9;
-}
-
-.dt-row-last { border-bottom: none; }
-
-.dt-row-icon {
-	width: 32rpx;
-	height: 32rpx;
-	border-radius: 8rpx;
-	margin-right: 16rpx;
+	justify-content: center;
 	flex-shrink: 0;
-}
-
-.dt-icon-date { background: #DBEAFE; }
-.dt-icon-buyer { background: #D1FAE5; }
-.dt-icon-agent { background: #FEF3C7; }
-.dt-icon-region { background: #E0E7FF; }
-.dt-icon-source { background: #FCE7F3; }
-
-.dt-row-label {
-	font-size: 26rpx;
-	color: #94A3B8;
-	width: 140rpx;
-	flex-shrink: 0;
-}
-
-.dt-row-val {
-	font-size: 26rpx;
-	color: #0F172A;
-	flex: 1;
-	font-weight: 500;
-}
-
-/* ==================== 通用卡片区域 ==================== */
-
-.dt-section {
-	background: #FFFFFF;
-	border-radius: 16rpx;
-	padding: 28rpx;
-	margin-bottom: 24rpx;
-	box-shadow: 0 2rpx 12rpx rgba(15, 23, 42, 0.04);
-}
-
-.dt-sec-title {
 	font-size: 28rpx;
+	color: #2563EB;
+}
+
+.nav-btn-left {
+	padding-left: 8rpx;
+	font-size: 32rpx;
+}
+
+.nav-btn-right {
+	font-size: 24rpx;
+	padding-right: 8rpx;
+}
+
+.nav-title {
+	flex: 1;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 30rpx;
 	font-weight: 600;
 	color: #0F172A;
-	margin-bottom: 20rpx;
-	display: block;
-}
-
-/* ==================== 关键词区域 ==================== */
-
-.dt-kw-list {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 12rpx;
-}
-
-.dt-kw-chip {
-	background: #FEF2F2;
-	color: #991B1B;
-	font-size: 24rpx;
-	font-weight: 500;
-	padding: 8rpx 18rpx;
-	border-radius: 8rpx;
-	border: 1rpx solid #FECACA;
-}
-
-/* ==================== 链接区域 ==================== */
-
-.dt-link-box {
-	background: #F8FAFC;
-	border: 1rpx solid #E2E8F0;
-	border-radius: 10rpx;
-	padding: 20rpx;
-	margin-bottom: 20rpx;
-	word-break: break-all;
-}
-
-.dt-link-url {
-	font-size: 24rpx;
-	color: #2563EB;
-	line-height: 1.7;
-}
-
-.dt-copy-btn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 10rpx;
-	background: linear-gradient(135deg, #2563EB, #1D4ED8);
-	color: #FFFFFF;
-	padding: 22rpx 0;
-	border-radius: 12rpx;
-	font-size: 30rpx;
-	font-weight: 500;
-	box-shadow: 0 4rpx 14rpx rgba(37, 99, 235, 0.25);
-	transition: transform 0.15s ease;
-}
-
-.dt-copy-btn:active {
-	transform: scale(0.97);
-}
-
-.dt-copy-icon {
-	width: 28rpx;
-	height: 28rpx;
-	border: 3rpx solid #FFFFFF;
-	border-radius: 4rpx;
-	position: relative;
-}
-
-.dt-link-tip {
-	display: block;
-	font-size: 22rpx;
-	color: #94A3B8;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 	text-align: center;
-	margin-top: 16rpx;
-	line-height: 1.6;
 }
 
-/* ==================== 加载 & 错误态 ==================== */
+/* ==================== 错误态 ==================== */
 
-.dt-loading {
+.err-wrap {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	min-height: 60vh;
-	gap: 20rpx;
+	gap: 24rpx;
+	padding: 40rpx;
 }
 
-.dt-loading-txt {
-	font-size: 26rpx;
-	color: #94A3B8;
-}
-
-.dt-error {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	min-height: 60vh;
-}
-
-.dt-err-icon {
+.err-icon {
 	width: 80rpx;
 	height: 80rpx;
 	border: 6rpx solid #CBD5E1;
 	border-radius: 50%;
-	position: relative;
-	margin-bottom: 24rpx;
+	margin-bottom: 8rpx;
 }
 
-.dt-err-txt {
+.err-txt {
 	font-size: 28rpx;
 	color: #64748B;
+}
+
+.err-back-btn {
+	background: #2563EB;
+	color: #FFFFFF;
+	padding: 18rpx 48rpx;
+	border-radius: 12rpx;
+	font-size: 28rpx;
+	margin-top: 8rpx;
 }

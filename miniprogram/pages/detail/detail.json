@@ -1,4 +1,4 @@
 {
 	"usingComponents": {},
-	"navigationBarTitleText": "采购详情"
+	"navigationStyle": "custom"
 }
