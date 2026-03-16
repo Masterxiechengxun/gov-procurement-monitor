@@ -65,6 +65,39 @@
 		</view>
 	</view>
 
+	<!-- 黑名单 -->
+	<view class="se-card anim-fade-up anim-d1b">
+		<view class="se-card-head">
+			<view class="se-icon-wrap se-icon-blacklist">
+				<view class="sico sico-ban">
+					<view class="sico-ban-circle"></view>
+					<view class="sico-ban-line"></view>
+				</view>
+			</view>
+			<view>
+				<text class="se-card-title">黑名单</text>
+				<text class="se-card-desc">包含以下关键字的采购信息将不会展示</text>
+			</view>
+		</view>
+
+		<view class="se-kw-chips">
+			<view wx:for="{{blacklist}}" wx:key="*this" class="se-kw-chip se-kw-chip-blacklist">
+				<text>{{item}}</text>
+				<text class="se-kw-chip-del" catchtap="deleteBlacklistWord" data-word="{{item}}">×</text>
+			</view>
+		</view>
+
+		<view wx:if="{{addingBlacklist}}" class="se-kw-add-row">
+			<input class="se-kw-add-input" placeholder="输入黑名单关键字" placeholder-style="color:#94A3B8;" value="{{newBlacklistWord}}" bindinput="onNewBlacklistInput" focus="true" confirm-type="done" bindconfirm="addBlacklistWord" />
+			<view class="se-fbtn se-fbtn-ok se-fbtn-mini" catchtap="addBlacklistWord"><text>添加</text></view>
+			<view class="se-fbtn se-fbtn-cancel se-fbtn-mini" catchtap="hideAddBlacklistInput"><text>取消</text></view>
+		</view>
+		<view wx:else class="se-add-trigger" bindtap="showAddBlacklistInput">
+			<text class="se-add-plus">+</text>
+			<text>添加黑名单关键字</text>
+		</view>
+	</view>
+
 	<!-- 自动抓取 -->
 	<view class="se-card anim-fade-up anim-d2">
 		<view class="se-card-head">

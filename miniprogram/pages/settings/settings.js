@@ -35,6 +35,11 @@ Page({
 		addingWord: false,
 		newWord: "",
 
+		blacklist: [],
+		blacklistLoaded: false,
+		addingBlacklist: false,
+		newBlacklistWord: "",
+
 		schedule: {
 			enabled: true,
 			dayType: "all"
@@ -56,6 +61,7 @@ Page({
 		this.loadConfig();
 		this.loadSources();
 		this.loadKeywords();
+		this.loadBlacklist();
 		this.loadSchedule();
 		this.loadStats();
 	},
@@ -266,6 +272,68 @@ Page({
 			console.error("保存关注分类失败:", err);
 		});
 		api.saveCustomKeywords(cats).then(function() {
+			util.showToast("已保存", "success");
+		}).catch(function(err) {
+			util.showToast("保存失败");
+			console.error(err);
+		});
+	},
+
+	/* ========== 黑名单 ========== */
+
+	loadBlacklist: function() {
+		var self = this;
+		api.getBlacklistKeywords().then(function(data) {
+			var list = (data && Array.isArray(data)) ? data : [];
+			self.setData({ blacklist: list, blacklistLoaded: true });
+		}).catch(function(err) {
+			console.error("加载黑名单失败:", err);
+			self.setData({ blacklist: [], blacklistLoaded: true });
+		});
+	},
+
+	showAddBlacklistInput: function() {
+		this.setData({ addingBlacklist: true, newBlacklistWord: "" });
+	},
+
+	hideAddBlacklistInput: function() {
+		this.setData({ addingBlacklist: false, newBlacklistWord: "" });
+	},
+
+	onNewBlacklistInput: function(e) {
+		this.setData({ newBlacklistWord: e.detail.value });
+	},
+
+	addBlacklistWord: function() {
+		var word = this.data.newBlacklistWord.trim();
+		if (!word) {
+			util.showToast("请输入黑名单关键字");
+			return;
+		}
+		if (this.data.blacklist.indexOf(word) !== -1) {
+			util.showToast("该关键字已在黑名单中");
+			return;
+		}
+		var blacklist = this.data.blacklist.slice();
+		blacklist.push(word);
+		this.setData({ addingBlacklist: false, newBlacklistWord: "" });
+		this.saveBlacklist(blacklist);
+	},
+
+	deleteBlacklistWord: function(e) {
+		var word = e.currentTarget.dataset.word;
+		var blacklist = this.data.blacklist.slice();
+		var idx = blacklist.indexOf(word);
+		if (idx !== -1) {
+			blacklist.splice(idx, 1);
+		}
+		this.saveBlacklist(blacklist);
+	},
+
+	saveBlacklist: function(blacklist) {
+		var self = this;
+		self.setData({ blacklist: blacklist });
+		api.saveBlacklistKeywords(blacklist).then(function() {
 			util.showToast("已保存", "success");
 		}).catch(function(err) {
 			util.showToast("保存失败");

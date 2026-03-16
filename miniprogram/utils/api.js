@@ -7,7 +7,7 @@ function callCloud(name, data) {
 				if (res.result && res.result.code === 0) {
 					resolve(res.result.data);
 				} else {
-					var errMsg = (res.result && res.result.message) || "请求失败";
+					var errMsg = (res.result && res.result.message) || (res.result && res.result.errMsg) || "请求失败";
 					reject(new Error(errMsg));
 				}
 			},
@@ -138,6 +138,19 @@ function getFollowedCategories() {
 	});
 }
 
+function getBlacklistKeywords() {
+	return callCloud("getData", {
+		action: "getBlacklistKeywords"
+	});
+}
+
+function saveBlacklistKeywords(keywords) {
+	return callCloud("getData", {
+		action: "saveBlacklistKeywords",
+		keywords: keywords
+	});
+}
+
 function saveFollowedCategories(categories) {
 	return callCloud("getData", {
 		action: "saveFollowedCategories",
@@ -187,6 +200,8 @@ module.exports = {
 	saveDisplaySources: saveDisplaySources,
 	getFollowedCategories: getFollowedCategories,
 	saveFollowedCategories: saveFollowedCategories,
+	getBlacklistKeywords: getBlacklistKeywords,
+	saveBlacklistKeywords: saveBlacklistKeywords,
 	getAnalytics: getAnalytics,
 	triggerCrawl: triggerCrawl
 };
