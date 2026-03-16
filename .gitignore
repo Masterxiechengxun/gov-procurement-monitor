@@ -1,0 +1,10 @@
+.DS_Store
+.idea/
+.pytest_cache
+.vscode
+.claude
+__pycache__/
+articles/
+*.json
+node_modules/
+**/node_modules/
