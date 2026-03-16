@@ -51,12 +51,14 @@ Page({
 
 	syncCloudPrefs: function() {
 		var self = this;
-		api.getDisplaySources().then(function(data) {
+		// 从云端同步用户启用的来源列表，驱动首页来源快捷栏
+		api.getCustomSources().then(function(data) {
 			if (data && Array.isArray(data) && data.length > 0) {
 				config.setDisplaySources(data);
 				self.setData({ sourceList: data });
 			}
 		}).catch(function() {});
+		// 从云端同步关注分类（与关键字列表保持一致）
 		api.getFollowedCategories().then(function(data) {
 			if (data && Array.isArray(data) && data.length > 0) {
 				config.setFollowedCategories(data);
@@ -211,7 +213,10 @@ Page({
 	},
 
 	onCardTap: function(e) {
-		var id = e.currentTarget.dataset.id;
-		wx.navigateTo({ url: "/pages/detail/detail?id=" + id });
+		var item = e.detail.item;
+		wx.navigateTo({
+			url: "/pages/detail/detail?url=" + encodeURIComponent(item.url || "") +
+				 "&title=" + encodeURIComponent(item.title || "招标详情")
+		});
 	}
 });
