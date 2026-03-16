@@ -3,6 +3,41 @@ var baseModule = require("./base");
 var BaseCrawler = baseModule.BaseCrawler;
 var sleep = baseModule.sleep;
 
+// 省份简称 → CCGP 接口参数映射
+var ZONE_MAP = {
+	"北京":   { displayZone: "北京",   zoneId: "11" },
+	"天津":   { displayZone: "天津",   zoneId: "12" },
+	"河北":   { displayZone: "河北",   zoneId: "13" },
+	"山西":   { displayZone: "山西",   zoneId: "14" },
+	"内蒙古": { displayZone: "内蒙古", zoneId: "15" },
+	"辽宁":   { displayZone: "辽宁",   zoneId: "21" },
+	"吉林":   { displayZone: "吉林",   zoneId: "22" },
+	"黑龙江": { displayZone: "黑龙江", zoneId: "23" },
+	"上海":   { displayZone: "上海",   zoneId: "31" },
+	"江苏":   { displayZone: "江苏",   zoneId: "32" },
+	"浙江":   { displayZone: "浙江",   zoneId: "33" },
+	"安徽":   { displayZone: "安徽",   zoneId: "34" },
+	"福建":   { displayZone: "福建",   zoneId: "35" },
+	"江西":   { displayZone: "江西",   zoneId: "36" },
+	"山东":   { displayZone: "山东",   zoneId: "37" },
+	"河南":   { displayZone: "河南",   zoneId: "41" },
+	"湖北":   { displayZone: "湖北",   zoneId: "42" },
+	"湖南":   { displayZone: "湖南",   zoneId: "43" },
+	"广东":   { displayZone: "广东",   zoneId: "44" },
+	"广西":   { displayZone: "广西",   zoneId: "45" },
+	"海南":   { displayZone: "海南",   zoneId: "46" },
+	"重庆":   { displayZone: "重庆",   zoneId: "50" },
+	"四川":   { displayZone: "四川",   zoneId: "51" },
+	"贵州":   { displayZone: "贵州",   zoneId: "52" },
+	"云南":   { displayZone: "云南",   zoneId: "53" },
+	"西藏":   { displayZone: "西藏",   zoneId: "54" },
+	"陕西":   { displayZone: "陕西",   zoneId: "61" },
+	"甘肃":   { displayZone: "甘肃",   zoneId: "62" },
+	"青海":   { displayZone: "青海",   zoneId: "63" },
+	"宁夏":   { displayZone: "宁夏",   zoneId: "64" },
+	"新疆":   { displayZone: "新疆",   zoneId: "65" }
+};
+
 function CcgpCrawler(config) {
 	BaseCrawler.call(this, config);
 }
@@ -13,15 +48,19 @@ CcgpCrawler.prototype.constructor = CcgpCrawler;
 CcgpCrawler.prototype.crawl = function(options) {
 	var self = this;
 	var opts = options || {};
-	var dateFrom = opts.dateFrom || getDefaultDateFrom();
-	var dateTo = opts.dateTo || formatCcgpDate(new Date());
-	var maxPages = opts.maxPages || 5;
+	var kw = opts.kw !== undefined ? opts.kw : "耗材";
+	var region = opts.region || "四川";
+	var zoneInfo = ZONE_MAP[region] || ZONE_MAP["四川"];
+	var dateFrom = opts.start_time ? formatCcgpDate(opts.start_time) : formatCcgpDate(getDefaultDateStr(-7));
+	var dateTo = opts.end_time ? formatCcgpDate(opts.end_time) : formatCcgpDate(getDefaultDateStr(0));
+	var timeType = opts.timeType || "2";
+	var maxPages = opts.maxPages || 15;
 
 	var allItems = [];
 	var partialErrors = [];
 	var seenUrls = {};
 
-	return crawlPages(self, dateFrom, dateTo, maxPages, seenUrls, partialErrors)
+	return crawlPages(self, kw, zoneInfo, dateFrom, dateTo, timeType, maxPages, seenUrls, partialErrors)
 		.then(function(items) {
 			for (var i = 0; i < items.length; i++) {
 				allItems.push(items[i]);
@@ -30,19 +69,19 @@ CcgpCrawler.prototype.crawl = function(options) {
 		});
 };
 
-function crawlPages(crawler, dateFrom, dateTo, maxPages, seenUrls, partialErrors) {
+function crawlPages(crawler, kw, zoneInfo, dateFrom, dateTo, timeType, maxPages, seenUrls, partialErrors) {
 	var items = [];
+	var resolvedMaxPages = null;
 
 	function crawlPage(page) {
-		if (page > maxPages) {
-			return Promise.resolve(items);
-		}
-
 		var params = Object.assign({}, crawler.config.params, {
+			kw: kw,
 			start_time: dateFrom,
 			end_time: dateTo,
-			timeType: "6",
-			page_index: String(page)
+			timeType: timeType,
+			page_index: String(page),
+			displayZone: zoneInfo.displayZone,
+			zoneId: zoneInfo.zoneId
 		});
 
 		console.log("[CCGP] 正在抓取第" + page + "页");
@@ -62,7 +101,17 @@ function crawlPages(crawler, dateFrom, dateTo, maxPages, seenUrls, partialErrors
 				return items;
 			}
 
-			var pageItems = parseCcgpList(html, crawler.config);
+			var $ = cheerio.load(html);
+
+			// 第一页时解析总页数，确定实际抓取上限
+			if (page === 1) {
+				var totalPages = parseTotalPages($);
+				resolvedMaxPages = Math.min(totalPages, maxPages);
+				console.log("[CCGP] 总页数=" + totalPages + "，实际抓取上限=" + resolvedMaxPages);
+			}
+
+			// 将 zoneInfo.displayZone 作为 regionLabel 直接入库，不依赖 HTML 解析
+			var pageItems = parseCcgpList($, crawler.config, kw, zoneInfo.displayZone);
 
 			if (pageItems.length === 0) {
 				console.log("[CCGP] 第" + page + "页无数据，停止翻页");
@@ -79,11 +128,11 @@ function crawlPages(crawler, dateFrom, dateTo, maxPages, seenUrls, partialErrors
 
 			console.log("[CCGP] 第" + page + "页获取 " + pageItems.length + " 条");
 
-		if (page < maxPages) {
-			return sleep(500).then(function() {
-				return crawlPage(page + 1);
-			});
-		}
+			if (page < resolvedMaxPages) {
+				return sleep(500).then(function() {
+					return crawlPage(page + 1);
+				});
+			}
 			return items;
 		}).catch(function(err) {
 			var msg = "第" + page + "页失败: " + err.message;
@@ -96,8 +145,21 @@ function crawlPages(crawler, dateFrom, dateTo, maxPages, seenUrls, partialErrors
 	return crawlPage(1);
 }
 
-function parseCcgpList(html, config) {
-	var $ = cheerio.load(html);
+function parseTotalPages($) {
+	var text = $(".pager").text();
+	var match = text.match(/共\s*(\d+)\s*页/);
+	if (match) return parseInt(match[1]);
+	var max = 1;
+	$(".pager a").each(function() {
+		var n = parseInt($(this).text().trim());
+		if (!isNaN(n) && n > max) max = n;
+	});
+	return max;
+}
+
+// regionLabel：由调用方传入（zoneInfo.displayZone），直接作为 region 字段入库
+// 不依赖 HTML parseMetaText 的 region 解析，确保多省份场景下数据正确
+function parseCcgpList($, config, kw, regionLabel) {
 	var items = [];
 
 	$(".vT-srch-result-list-bid li").each(function() {
@@ -128,11 +190,15 @@ function parseCcgpList(html, config) {
 			source: config.id,
 			sourceName: config.name,
 			publishDate: info.date || "",
-			region: info.region || "四川省",
+			region: regionLabel || "四川",
 			buyer: info.buyer || "",
 			agent: info.agent || "",
 			bidType: info.bidType || "",
-			contentSnippet: cleanText(title)
+			kw: kw,
+			contentHtml: null,
+			fetchRetryCount: 0,
+			detailFetchedAt: null,
+			crawledAt: new Date()
 		});
 	});
 
@@ -144,8 +210,7 @@ function parseMetaText(text) {
 		date: "",
 		buyer: "",
 		agent: "",
-		bidType: "",
-		region: ""
+		bidType: ""
 	};
 
 	if (!text) {
@@ -173,13 +238,6 @@ function parseMetaText(text) {
 		}
 	}
 
-	var regionMatch = text.match(/(四川省[\-\s]*[\u4e00-\u9fa5]*[市州县区])/);
-	if (regionMatch) {
-		info.region = regionMatch[1];
-	} else if (text.indexOf("四川") !== -1) {
-		info.region = "四川省";
-	}
-
 	return info;
 }
 
@@ -190,17 +248,19 @@ function cleanText(text) {
 	return text.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
-function formatCcgpDate(date) {
-	var y = date.getFullYear();
-	var m = date.getMonth() + 1;
-	var d = date.getDate();
-	return y + "%3A" + (m < 10 ? "0" + m : m) + "%3A" + (d < 10 ? "0" + d : d);
+// 将 YYYY-MM-DD 转为 CCGP 接口要求的 YYYY%3AMM%3ADD
+function formatCcgpDate(dateStr) {
+	return dateStr.replace(/-/g, "%3A");
 }
 
-function getDefaultDateFrom() {
-	var date = new Date();
-	date.setDate(date.getDate() - 3);
-	return formatCcgpDate(date);
+// 生成相对今日 offsetDays 天的 YYYY-MM-DD 字符串
+function getDefaultDateStr(offsetDays) {
+	var d = new Date();
+	d.setDate(d.getDate() + offsetDays);
+	var y = d.getFullYear();
+	var m = d.getMonth() + 1;
+	var day = d.getDate();
+	return y + "-" + (m < 10 ? "0" + m : m) + "-" + (day < 10 ? "0" + day : day);
 }
 
 module.exports = CcgpCrawler;

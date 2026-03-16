@@ -8,11 +8,10 @@ var sources = [
 		params: {
 			searchtype: "1",
 			bidSort: "0",
-			pinMu: "1",
+			pinMu: "0",
+			bidType: "0",
 			dbselect: "bidx",
-			pppStatus: "0",
-			zoneId: "51",
-			displayZone: "四川省"
+			pppStatus: "0"
 		},
 		bidTypes: [
 			{ value: "1", label: "公开招标" },

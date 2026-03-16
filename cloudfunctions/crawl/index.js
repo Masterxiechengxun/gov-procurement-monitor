@@ -22,20 +22,29 @@ exports.main = function(event, context) {
 	var isManual = event.manual || false;
 	console.log("[Crawl] 开始执行, 手动触发=" + isManual);
 
+	var crawlOptions = {
+		kw:         event.kw,
+		region:     event.region,
+		start_time: event.start_time,
+		end_time:   event.end_time,
+		timeType:   event.timeType,
+		maxPages:   event.maxPages
+	};
+
 	if (!isManual) {
 		return checkSchedule().then(function(shouldRun) {
 			if (!shouldRun) {
 				console.log("[Crawl] 当前不满足抓取策略条件，跳过执行");
 				return { code: 0, message: "跳过执行（不满足策略条件）", data: null };
 			}
-			return executeCrawl();
+			return executeCrawl(crawlOptions);
 		});
 	}
 
-	return executeCrawl();
+	return executeCrawl(crawlOptions);
 };
 
-function executeCrawl() {
+function executeCrawl(crawlOptions) {
 	var startTime = Date.now();
 	var crawlResults = {
 		total: 0,
@@ -52,7 +61,7 @@ function executeCrawl() {
 			var crawlSources = aggregateSources(userMap);
 			var mergedKeywords = mergeAllKeywords(userMap);
 
-			return crawlAllSources(crawlSources, crawlResults, mergedKeywords);
+			return crawlAllSources(crawlSources, crawlResults, mergedKeywords, crawlOptions);
 		})
 		.then(function() {
 			return sendNotifications(crawlResults, allUsersConfig);
@@ -305,7 +314,7 @@ function getChinaTime() {
 
 /* ========== 全量抓取执行 ========== */
 
-function crawlAllSources(sources, results, mergedKeywords) {
+function crawlAllSources(sources, results, mergedKeywords, crawlOptions) {
 	function crawlNext(index) {
 		if (index >= sources.length) {
 			return Promise.resolve();
@@ -338,9 +347,16 @@ function crawlAllSources(sources, results, mergedKeywords) {
 		var prevNewItems = results.newItems;
 		var prevMatchedItems = results.matchedItems;
 
-		return crawler.crawl({})
-			.then(function(crawlResult) {
-				var items, partialErrors;
+		var startTimePromise = (crawlOptions && crawlOptions.start_time)
+			? Promise.resolve(crawlOptions.start_time)
+			: detectStartDate(source.id);
+
+		return startTimePromise.then(function(resolvedStartTime) {
+			var sourceOptions = Object.assign({}, crawlOptions || {}, { start_time: resolvedStartTime });
+			console.log("[Crawl] " + source.name + " 使用 start_time=" + resolvedStartTime);
+			return crawler.crawl(sourceOptions);
+		}).then(function(crawlResult) {
+			var items, partialErrors;
 				if (Array.isArray(crawlResult)) {
 					items = crawlResult;
 					partialErrors = [];
@@ -669,4 +685,40 @@ function saveCrawlLog(results, startTime) {
 		.catch(function(err) {
 			console.error("[Crawl] 记录抓取日志失败: " + err.message);
 		});
+}
+
+/**
+ * 检测指定来源的最新公告日期，用于确定本次爬取的 start_time。
+ * - 若 DB 中无该来源的记录：返回今日 -7 天（首次运行默认覆盖最近一周）
+ * - 若 DB 有记录：返回最新记录的 publishDate（避免重复抓取大量历史数据）
+ */
+function detectStartDate(sourceId) {
+	return db.collection("procurements")
+		.where({ source: sourceId })
+		.orderBy("publishDate", "desc")
+		.limit(1)
+		.get()
+		.then(function(res) {
+			if (res.data.length === 0 || !res.data[0].publishDate) {
+				var defaultStart = getDefaultCrawlDate(-7);
+				console.log("[Crawl] detectStartDate(" + sourceId + "): 无存量数据，使用默认 " + defaultStart);
+				return defaultStart;
+			}
+			var latestDate = res.data[0].publishDate;
+			console.log("[Crawl] detectStartDate(" + sourceId + "): 存量最新日期=" + latestDate);
+			return latestDate;
+		})
+		.catch(function(err) {
+			console.warn("[Crawl] detectStartDate 查询失败，使用默认: " + err.message);
+			return getDefaultCrawlDate(-7);
+		});
+}
+
+function getDefaultCrawlDate(offsetDays) {
+	var d = new Date();
+	d.setDate(d.getDate() + offsetDays);
+	var y = d.getFullYear();
+	var m = d.getMonth() + 1;
+	var day = d.getDate();
+	return y + "-" + (m < 10 ? "0" + m : m) + "-" + (day < 10 ? "0" + day : day);
 }
