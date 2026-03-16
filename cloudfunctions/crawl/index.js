@@ -705,6 +705,12 @@ function detectStartDate(sourceId) {
 				return defaultStart;
 			}
 			var latestDate = res.data[0].publishDate;
+			// 校验格式必须是 YYYY-MM-DD，防止历史脏数据导致 formatCcgpDate 转换错误
+			if (!/^\d{4}-\d{2}-\d{2}$/.test(latestDate)) {
+				var fallback = getDefaultCrawlDate(-7);
+				console.warn("[Crawl] detectStartDate(" + sourceId + "): publishDate 格式异常 '" + latestDate + "'，使用默认 " + fallback);
+				return fallback;
+			}
 			console.log("[Crawl] detectStartDate(" + sourceId + "): 存量最新日期=" + latestDate);
 			return latestDate;
 		})

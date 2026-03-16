@@ -110,6 +110,9 @@ function processItems(items) {
 }
 
 function fetchItemDetail(item) {
+	// Referer 使用 CCGP 域名。当前仅 CCGP 来源的记录设有 contentHtml: null，
+	// sichuan_ggzy 来源不设置 contentHtml 字段，故不会被 fetchPendingItems 查询到。
+	// 若将来新增其他来源且同样需要补抓，需根据 item.source 动态选择 Referer。
 	return axios({
 		url: item.url,
 		method: "GET",
