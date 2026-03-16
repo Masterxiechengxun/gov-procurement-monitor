@@ -6,13 +6,14 @@ var DEFAULT_SOURCE = {
 	name: "中国政府采购网",
 	website: "https://www.ccgp.gov.cn"
 };
-var DEFAULT_FOLLOWED = ["色谱类"];
-var DEFAULT_KEYWORD_CATEGORY = "色谱类";
-var DEFAULT_KEYWORDS = [
-	"色谱", "液相色谱", "气相色谱", "离子色谱",
-	"高效液相", "超高效液相", "薄层色谱",
-	"HPLC", "UHPLC", "GC", "IC"
+// 默认展示全部内置来源（与 cloudfunctions/crawl/config/sources.js 保持一致）
+var DEFAULT_DISPLAY_SOURCES = [
+	{ id: "ccgp", name: "中国政府采购网" },
+	{ id: "sichuan_ggzy", name: "四川省公共资源交易网" }
 ];
+var DEFAULT_FOLLOWED = ["耗材"];
+var DEFAULT_KEYWORD_CATEGORY = "耗材";
+var DEFAULT_KEYWORDS = ["耗材"];
 
 var config = {
 	bidTypes: {
@@ -30,6 +31,8 @@ var config = {
 	cloudEnv: "",
 
 	getDisplaySources: function() {
+		// 优先读本地缓存（由 settings 保存/syncCloudPrefs 更新），
+		// 无缓存时返回全部内置来源作为默认值
 		try {
 			var cached = wx.getStorageSync(STORAGE_KEY_SOURCES);
 			if (cached && cached.length > 0) {
@@ -38,7 +41,7 @@ var config = {
 		} catch (e) {
 			console.error("读取来源配置失败:", e);
 		}
-		return [{ id: DEFAULT_SOURCE.id, name: DEFAULT_SOURCE.name }];
+		return DEFAULT_DISPLAY_SOURCES.slice();
 	},
 
 	setDisplaySources: function(list) {

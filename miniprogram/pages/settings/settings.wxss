@@ -390,6 +390,11 @@
 	flex-shrink: 0;
 }
 
+.se-row-readonly {
+	font-size: 26rpx;
+	color: #64748B;
+}
+
 .se-picker {
 	font-size: 26rpx;
 	color: #2563EB;
@@ -434,39 +439,69 @@
 
 /* ==================== 来源列表 ==================== */
 
-.se-source-list { margin-bottom: 8rpx; }
-
-.se-source-row {
+.se-source-item {
 	display: flex;
 	align-items: center;
-	padding: 16rpx 0;
-	border-bottom: 1rpx solid #F1F5F9;
-	gap: 12rpx;
+	padding: 20rpx 0;
 }
 
-.se-source-row:last-child { border-bottom: none; }
+.se-source-item-border {
+	border-bottom: 1rpx solid #F1F5F9;
+}
 
-.se-source-info { flex: 1; overflow: hidden; }
+.se-source-left {
+	flex: 1;
+	overflow: hidden;
+	transition: opacity 0.2s ease;
+}
+
+.se-source-left-off {
+	opacity: 0.45;
+}
+
+.se-source-name-row {
+	display: flex;
+	align-items: center;
+	gap: 10rpx;
+	margin-bottom: 6rpx;
+}
 
 .se-source-name {
 	font-size: 28rpx;
 	color: #0F172A;
-	display: block;
+	font-weight: 600;
+}
+
+.se-source-tag {
+	font-size: 18rpx;
 	font-weight: 500;
+	padding: 2rpx 10rpx;
+	border-radius: 20rpx;
+}
+
+.se-source-tag-on {
+	background: #DCFCE7;
+	color: #16A34A;
+}
+
+.se-source-tag-off {
+	background: #F1F5F9;
+	color: #94A3B8;
 }
 
 .se-source-url {
 	font-size: 20rpx;
 	color: #94A3B8;
 	display: block;
-	margin-top: 4rpx;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	margin-bottom: 4rpx;
 }
 
-.se-del-btn { padding: 8rpx 16rpx; flex-shrink: 0; }
-.se-del-btn text { font-size: 22rpx; color: #EF4444; font-weight: 500; }
+.se-source-desc {
+	font-size: 22rpx;
+	color: #64748B;
+	display: block;
+	line-height: 1.5;
+}
 
 
 /* ==================== 添加表单 ==================== */
@@ -618,6 +653,7 @@
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10rpx;
+	margin-bottom: 4rpx;
 }
 
 .se-kw-chip {
@@ -881,5 +917,108 @@
 	display: block;
 	margin-top: 8rpx;
 	text-align: right;
+}
+
+/* ==================== 抓取策略卡片 ==================== */
+
+/* 子分区 */
+.se-subsection {
+	margin-bottom: 16rpx;
+}
+
+.se-subsection-hd {
+	display: flex;
+	align-items: center;
+	gap: 10rpx;
+	margin-bottom: 10rpx;
+}
+
+.se-subsection-title {
+	font-size: 22rpx;
+	font-weight: 600;
+	color: #475569;
+}
+
+/* 徽章 */
+.se-badge {
+	font-size: 18rpx;
+	font-weight: 500;
+	padding: 3rpx 12rpx;
+	border-radius: 20rpx;
+}
+
+.se-badge-sys {
+	background: #F1F5F9;
+	color: #64748B;
+	border: 1rpx solid #CBD5E1;
+}
+
+.se-badge-ctrl {
+	background: #EFF6FF;
+	color: #2563EB;
+	border: 1rpx solid #BFDBFE;
+}
+
+/* 系统触发器只读行 */
+.se-trigger-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12rpx 16rpx;
+	background: #F8FAFC;
+	border-radius: 8rpx;
+	margin-bottom: 6rpx;
+}
+
+.se-trigger-row-last {
+	margin-bottom: 0;
+}
+
+.se-trigger-name {
+	font-size: 24rpx;
+	color: #64748B;
+}
+
+.se-trigger-val {
+	font-size: 24rpx;
+	color: #475569;
+	font-weight: 500;
+}
+
+/* 执行控制子分区：上边线分隔 */
+.se-subsection-ctrl {
+	padding-top: 16rpx;
+	border-top: 1rpx solid #F1F5F9;
+}
+
+/* 禁用状态：行和 picker 变淡 */
+.se-row-dim .se-row-label { color: #CBD5E1; }
+
+.se-picker-dim {
+	color: #CBD5E1 !important;
+	background: #F8FAFC !important;
+	border-color: transparent !important;
+}
+
+/* 策略生效摘要 */
+.se-schedule-summary {
+	margin-top: 16rpx;
+	padding: 14rpx 18rpx;
+	background: #F8FAFC;
+	border-radius: 10rpx;
+	text-align: center;
+}
+
+.se-schedule-summary text {
+	font-size: 22rpx;
+	color: #94A3B8;
+}
+
+.se-schedule-summary-on {
+	background: #F0FDF4;
+}
+
+.se-schedule-summary-on text {
+	color: #059669;
 }
 

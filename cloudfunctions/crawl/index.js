@@ -137,10 +137,9 @@ function loadAllUsersConfig() {
 }
 
 /**
- * 聚合所有用户配置的来源，从数据库动态获取要抓取的网站。
- * sources.js 仅作为爬虫技术注册表（baseUrl、params 等实现细节），
- * 用户在设置页管理的来源（custom_sources）决定抓取哪些网站。
- * 若数据库中无任何用户配置，则使用 sources.js 中的全部来源作为兜底。
+ * 聚合所有用户配置的来源，决定本次抓取哪些网站。
+ * custom_sources 存储用户启用的来源 ID 列表（由小程序设置页写入）。
+ * 若数据库中无任何用户配置，则默认使用全部内置来源（ccgp + sichuan_ggzy）。
  */
 function aggregateSources(userMap) {
 	var sourceMap = {};
@@ -157,6 +156,7 @@ function aggregateSources(userMap) {
 		}
 	}
 
+	// 无用户配置时回退到全部内置来源
 	if (Object.keys(sourceMap).length === 0) {
 		return sourcesConfig.getEnabledSources();
 	}

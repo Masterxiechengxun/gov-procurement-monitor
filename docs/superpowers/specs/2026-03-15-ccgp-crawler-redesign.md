@@ -12,17 +12,23 @@
 1. `timeType` 使用 `"6"`，应为 `"2"`（按公告时间段搜索）
 2. `pinMu` 使用 `"1"`，应为 `"0"`（全部类别）
 3. `bidType` 未设置，应为 `"0"`（全部类型）
-4. `displayZone` 使用 `"四川省"`，应为 `"四川"`
-5. 不支持关键字 `kw` 参数（默认应为"耗材"）
-6. 翻页依赖固定 `maxPages=5`，未读取分页器实际总页数
-7. 只存列表元数据，不抓取每条公告的完整原文
+4. `displayZone` 使用 `"四川省"`，应为 `"四川"`，且不支持动态传入
+5. `zoneId` 硬编码在 sources.js 中，不可动态传入
+6. 不支持关键字 `kw` 参数（默认应为"耗材"）
+7. 翻页依赖固定 `maxPages=5`，未读取分页器实际总页数
+8. 只存列表元数据，不抓取每条公告的完整原文
+9. 每次爬取时间范围固定使用 -3 天，未根据存量数据自动调整
 
 ---
 
 ## 目标
 
-- 正确抓取中国政府采购网（search.ccgp.gov.cn）四川地区近一周的采购公告列表
-- 支持关键字参数传入，默认关键字"耗材"
+- 正确抓取中国政府采购网（search.ccgp.gov.cn）指定地区指定关键字的采购公告列表
+- 支持三个用户可配置的搜索条件（通过设置页 / event 参数传入）：
+  - **关键字**（kw）：默认"耗材"
+  - **地区**（region）：默认"四川"，动态映射为 CCGP 接口所需的 `displayZone` + `zoneId`
+  - **时间范围**：自动根据存量数据智能决定
+- 智能起始日期：DB 无数据时默认最近 7 天；DB 有数据时从存量数据最新 `publishDate` 开始
 - 动态读取分页器，抓取全部页（设安全上限）
 - 两阶段入库：第一阶段存列表元数据，第二阶段补充完整原文 HTML
 - 支持定时自动 + 手动触发两种模式
@@ -56,13 +62,58 @@ crawl 云函数（第一阶段）        fetchDetail 云函数（第二阶段）
 | `timeType`     | `"6"`      | `"2"`   | 按公告时间段搜索   |
 | `pinMu`        | `"1"`      | `"0"`   | 全部类别           |
 | `bidType`      | 未设置     | `"0"`   | 全部类型           |
-| `displayZone`  | `"四川省"` | `"四川"` | 匹配实际参数       |
+| `displayZone`  | `"四川省"` 硬编码 | 动态从 `region` 映射 | 通过 zone map 查表 |
+| `zoneId`       | `"51"` 硬编码     | 动态从 `region` 映射 | 通过 zone map 查表 |
 | `kw`           | 未支持     | 动态传入 | 关键字，默认"耗材" |
+
+**地区参数（region）与 Zone Map：**
+
+`ccgp.js` 内维护一个 `ZONE_MAP` 常量，将用户可读的省份简称映射为 CCGP 接口参数：
+
+```js
+var ZONE_MAP = {
+    "北京": { displayZone: "北京", zoneId: "11" },
+    "天津": { displayZone: "天津", zoneId: "12" },
+    "河北": { displayZone: "河北", zoneId: "13" },
+    "山西": { displayZone: "山西", zoneId: "14" },
+    "内蒙古": { displayZone: "内蒙古", zoneId: "15" },
+    "辽宁": { displayZone: "辽宁", zoneId: "21" },
+    "吉林": { displayZone: "吉林", zoneId: "22" },
+    "黑龙江": { displayZone: "黑龙江", zoneId: "23" },
+    "上海": { displayZone: "上海", zoneId: "31" },
+    "江苏": { displayZone: "江苏", zoneId: "32" },
+    "浙江": { displayZone: "浙江", zoneId: "33" },
+    "安徽": { displayZone: "安徽", zoneId: "34" },
+    "福建": { displayZone: "福建", zoneId: "35" },
+    "江西": { displayZone: "江西", zoneId: "36" },
+    "山东": { displayZone: "山东", zoneId: "37" },
+    "河南": { displayZone: "河南", zoneId: "41" },
+    "湖北": { displayZone: "湖北", zoneId: "42" },
+    "湖南": { displayZone: "湖南", zoneId: "43" },
+    "广东": { displayZone: "广东", zoneId: "44" },
+    "广西": { displayZone: "广西", zoneId: "45" },
+    "海南": { displayZone: "海南", zoneId: "46" },
+    "重庆": { displayZone: "重庆", zoneId: "50" },
+    "四川": { displayZone: "四川", zoneId: "51" },
+    "贵州": { displayZone: "贵州", zoneId: "52" },
+    "云南": { displayZone: "云南", zoneId: "53" },
+    "西藏": { displayZone: "西藏", zoneId: "54" },
+    "陕西": { displayZone: "陕西", zoneId: "61" },
+    "甘肃": { displayZone: "甘肃", zoneId: "62" },
+    "青海": { displayZone: "青海", zoneId: "63" },
+    "宁夏": { displayZone: "宁夏", zoneId: "64" },
+    "新疆": { displayZone: "新疆", zoneId: "65" }
+};
+```
+
+若 `region` 在 map 中找不到，fallback 到 `"四川"`。
+
+**sources.js 中的 `displayZone` 和 `zoneId` 字段须移除**，由 `ccgp.js` 动态覆盖。
 
 **日期参数格式：**
 - `event` 层（外部调用）传入明文 `YYYY-MM-DD` 格式（如 `"2026-03-07"`）
 - `ccgp.js` 内部在构造 HTTP 请求时将 `-` 替换为 `:` 并经 `encodeURIComponent` 编码，最终发送 `YYYY%3AMM%3ADD`
-- 若 `event` 未传，默认 `start_time` = 今日 -7 天，`end_time` = 今日，均以 `YYYY-MM-DD` 格式生成后同样编码
+- `start_time` 的实际值由 `index.js` 的智能日期检测逻辑决定（见下方 1.6 节）
 
 #### 1.2 动态分页
 
@@ -99,7 +150,8 @@ function parseTotalPages($) {
 ```js
 {
   kw:         string,   // 单个关键字字符串，默认 "耗材"；传 "" 表示不限关键字（搜索全量）
-  start_time: string,   // YYYY-MM-DD 明文，默认今日 -7 天
+  region:     string,   // 省份简称，默认 "四川"；用于查 ZONE_MAP 得到 displayZone + zoneId
+  start_time: string,   // YYYY-MM-DD 明文；若未传，由 index.js detectStartDate() 自动决定
   end_time:   string,   // YYYY-MM-DD 明文，默认今日
   timeType:   string,   // 默认 "2"
   maxPages:   number    // 安全翻页上限，默认 15
@@ -107,6 +159,8 @@ function parseTotalPages($) {
 ```
 
 **`kw` 说明：** 仅支持单个关键字字符串，对应 CCGP 搜索接口的 `kw` 参数。若调用方需要多个关键字，应多次调用云函数（每次传不同 `kw`），不支持在单次调用中传入多个关键字。存入数据库的 `kw` 字段记录本次实际使用的搜索关键字。
+
+**`region` 说明：** 用户在设置页选择省份（如"四川"），通过 event.region 传入。ccgp.js 内的 ZONE_MAP 将其转为 CCGP 接口所需的 `displayZone` 和 `zoneId`。传入不存在的省份时 fallback 到"四川"。
 
 #### 1.4 入库数据结构
 
@@ -143,6 +197,45 @@ function parseTotalPages($) {
 1. 取本次抓取所有 URL，分批（每批20条）查询 `procurements` 集合
 2. 过滤掉已存在的 URL，仅对新 URL 调用 `db.collection("procurements").add()`
 3. 并发风险说明：定时触发与手动触发若恰好同时执行，理论上可能对同一条 URL 双写。微信云数据库无唯一索引约束，双写会产生重复记录。缓解措施：依赖现有 `checkSchedule` 中的"距上次抓取间隔"检查——定时触发之间间隔大于 0.5h，手动触发不受限制但概率极低。可接受极低概率的重复记录，不额外引入分布式锁机制（复杂度与收益不匹配）。
+
+#### 1.6 智能起始日期检测（`detectStartDate`）
+
+**位置：** 在 `crawl/index.js` 中新增 `detectStartDate(sourceId)` 函数。
+
+**触发时机：** 每次执行爬取时，若 `event.start_time` 未显式传入，则调用此函数自动决定 `start_time`。
+
+**逻辑：**
+
+```
+detectStartDate(sourceId):
+  1. 查询 procurements 集合，where source = sourceId
+     orderBy publishDate DESC，limit 1
+  2. 若无记录 或 publishDate 为空字符串
+       → 返回 今日 -7 天的 YYYY-MM-DD 字符串
+  3. 若有记录
+       → 返回 latestPublishDate（即存量数据最新公告日期）
+       （不减天数，直接从最新日期当天开始，避免重复抓取太多历史数据；
+        由于 CCGP 搜索是 start_time ≤ 公告日期，当天的数据也会被包含）
+```
+
+**调用位置：** 在 `crawlAllSources` 中，对每个 source 分别调用，结果合并到该 source 的 crawlOptions 中：
+
+```js
+// 若 crawlOptions.start_time 已指定，直接使用；否则自动检测
+var startTimePromise = crawlOptions.start_time
+    ? Promise.resolve(crawlOptions.start_time)
+    : detectStartDate(source.id);
+
+return startTimePromise.then(function(startTime) {
+    var sourceOptions = Object.assign({}, crawlOptions, { start_time: startTime });
+    return crawler.crawl(sourceOptions);
+});
+```
+
+**说明：**
+- 各来源独立检测，互不影响（CCGP 和 sichuan_ggzy 各有自己的最新日期）
+- `event.start_time` 显式传入时优先使用，满足手动指定时间范围的需求
+- `publishDate` 为字符串 "YYYY-MM-DD"，字典序排序可正确比较日期大小
 
 ---
 
@@ -223,16 +316,18 @@ cloudfunctions/
 
 ```js
 exports.main = function(event, context) {
-  // event.kw, event.start_time 等均为可选，未传时爬虫使用默认值
+  // event.kw, event.region, event.start_time 等均为可选，未传时使用默认值
   var crawlOptions = {
     kw:         event.kw,
-    start_time: event.start_time,  // YYYY-MM-DD 明文或 undefined
+    region:     event.region,      // 省份简称，如 "四川"
+    start_time: event.start_time,  // YYYY-MM-DD 明文或 undefined（undefined时自动检测）
     end_time:   event.end_time,
     timeType:   event.timeType,
     maxPages:   event.maxPages
   };
   ...
-  return crawler.crawl(crawlOptions);
+  // start_time 的实际值由 detectStartDate 在 crawlAllSources 中动态决定
+  return crawlAllSources(crawlSources, crawlResults, mergedKeywords, crawlOptions);
 };
 ```
 
@@ -255,9 +350,9 @@ exports.main = function(event, context) {
 
 | 文件 | 操作 |
 |------|------|
-| `cloudfunctions/crawl/crawlers/ccgp.js` | 修改：修正参数、支持 kw、动态分页、日期编码内化 |
-| `cloudfunctions/crawl/config/sources.js` | 修改：更正 pinMu、bidType、displayZone |
-| `cloudfunctions/crawl/index.js` | 修改：透传 event crawlOptions 给爬虫 |
+| `cloudfunctions/crawl/crawlers/ccgp.js` | 修改：修正参数、支持 kw、支持 region（ZONE_MAP）、动态分页、日期编码内化 |
+| `cloudfunctions/crawl/config/sources.js` | 修改：更正 pinMu、bidType；移除 displayZone 和 zoneId（改由 ccgp.js 动态覆盖）|
+| `cloudfunctions/crawl/index.js` | 修改：透传 event crawlOptions（含 region）给爬虫；新增 detectStartDate() |
 | `cloudfunctions/fetchDetail/index.js` | 新建：第二阶段详情抓取 |
 | `cloudfunctions/fetchDetail/package.json` | 新建 |
 | `cloudfunctions/fetchDetail/config.json` | 新建 |

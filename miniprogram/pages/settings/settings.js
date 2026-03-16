@@ -3,49 +3,48 @@ var util = require("../../utils/util");
 var config = require("../../utils/config");
 
 Page({
+	// 内置来源列表（与 cloudfunctions/crawl/config/sources.js 保持一致）
+	_builtInSources: [
+		{
+			id: "ccgp",
+			name: "中国政府采购网",
+			website: "https://www.ccgp.gov.cn",
+			desc: "全国政府采购信息发布指定媒体，覆盖全国各省市",
+			enabled: true
+		},
+		{
+			id: "sichuan_ggzy",
+			name: "四川省公共资源交易网",
+			website: "https://ggzyjy.sc.gov.cn",
+			desc: "四川省政府政务服务和公共资源交易服务中心",
+			enabled: true
+		}
+	],
+
 	data: {
 		pushplusToken: "",
 		showToken: false,
 		crawling: false,
 		lastCrawl: null,
 
-		followedCats: {},
-
 		sources: [],
 		sourcesLoaded: false,
-		showAddSource: false,
-		newSourceName: "",
-		newSourceUrl: "",
 
-		keywordCategories: {},
-		keywordCatNames: [],
-		expandedCats: {},
+		keywords: [],
 		keywordsLoaded: false,
-		showAddCategory: false,
-		newCatName: "",
-		addingWordCat: "",
+		addingWord: false,
 		newWord: "",
 
 		schedule: {
 			enabled: true,
-			intervalHours: 24,
-			dayType: "all",
-			startHour: 6,
-			startMinute: 0
+			intervalHours: 1,
+			dayType: "all"
 		},
 		scheduleLoaded: false,
-		intervalOptions: [1, 2, 3, 4, 6, 8, 12, 24],
-		intervalIndex: 7,
+		intervalOptions: [1, 2, 4, 6, 8, 12, 24],
+		intervalIndex: 0,
 		dayTypeOptions: ["每天", "仅工作日", "仅周末"],
 		dayTypeIndex: 0,
-		hourOptions: [],
-		minuteOptions: [],
-		hourIndex: 6,
-		minuteIndex: 0,
-
-		retentionOptions: [30, 60, 90, 180, 365],
-		retentionIndex: 2,
-		retentionDays: 90,
 
 		storageInfo: null
 	},
@@ -57,21 +56,10 @@ Page({
 	},
 
 	onLoad: function() {
-		var hours = [];
-		for (var h = 0; h < 24; h++) {
-			hours.push(h < 10 ? "0" + h : "" + h);
-		}
-		var minutes = [];
-		for (var m = 0; m < 60; m += 5) {
-			minutes.push(m < 10 ? "0" + m : "" + m);
-		}
-		this.setData({ hourOptions: hours, minuteOptions: minutes });
-
 		this.loadConfig();
 		this.loadSources();
 		this.loadKeywords();
 		this.loadSchedule();
-		this.loadRetention();
 		this.loadStats();
 	},
 
@@ -79,9 +67,9 @@ Page({
 
 	loadConfig: function() {
 		var self = this;
-		api.getConfig().then(function(config) {
-			if (config && config.pushplus_token) {
-				self.setData({ pushplusToken: config.pushplus_token });
+		api.getConfig().then(function(cfg) {
+			if (cfg && cfg.pushplus_token) {
+				self.setData({ pushplusToken: cfg.pushplus_token });
 			}
 		}).catch(function(err) {
 			console.error("加载配置失败:", err);
@@ -116,105 +104,53 @@ Page({
 
 	loadSources: function() {
 		var self = this;
-		api.getCustomSources().then(function(data) {
-			var sources = self.ensureDefaultSource(data || []);
-			self.setData({ sources: sources, sourcesLoaded: true });
-			self.syncDisplaySources(sources);
-		}).catch(function(err) {
-			console.error("加载网站列表失败:", err);
-			self.setData({
-				sources: [config.getDefaultSource()],
-				sourcesLoaded: true
-			});
-			self.syncDisplaySources(self.data.sources);
-		});
-	},
-
-	ensureDefaultSource: function(sources) {
-		if (sources.length === 0) {
-			sources.push(config.getDefaultSource());
-		}
-		return sources;
-	},
-
-	syncDisplaySources: function(sources) {
-		if (!sources || sources.length === 0) {
-			return;
-		}
-		var displayList = [];
-		for (var i = 0; i < sources.length; i++) {
-			displayList.push({ id: sources[i].id, name: sources[i].name });
-		}
-		config.setDisplaySources(displayList);
-		api.saveDisplaySources(displayList).catch(function(err) {
-			console.error("保存显示来源到云端失败:", err);
-		});
-	},
-
-	deleteSource: function(e) {
-		var self = this;
-		var idx = e.currentTarget.dataset.idx;
-		var name = self.data.sources[idx].name;
-
-		if (self.data.sources.length <= 1) {
-			util.showToast("至少保留一个网站");
-			return;
-		}
-
-		wx.showModal({
-			title: "删除确认",
-			content: "确定删除「" + name + "」吗？",
-			success: function(res) {
-				if (!res.confirm) {
-					return;
+		var builtIn = self._builtInSources;
+		api.getCustomSources().then(function(saved) {
+			var sources = builtIn.map(function(src) {
+				var s = JSON.parse(JSON.stringify(src));
+				if (saved && Array.isArray(saved) && saved.length > 0) {
+					// 有用户配置时，以 DB 中存在与否决定启用状态
+					s.enabled = saved.some(function(x) { return x.id === s.id; });
 				}
-				var list = self.data.sources.slice();
-				list.splice(idx, 1);
-				self.setData({ sources: list });
-				self.saveSources();
-			}
+				return s;
+			});
+			self.setData({ sources: sources, sourcesLoaded: true });
+		}).catch(function() {
+			var sources = builtIn.map(function(src) {
+				return JSON.parse(JSON.stringify(src));
+			});
+			self.setData({ sources: sources, sourcesLoaded: true });
 		});
 	},
 
-	showAddSourceForm: function() {
-		this.setData({ showAddSource: true, newSourceName: "", newSourceUrl: "" });
-	},
+	toggleSource: function(e) {
+		var idx = e.currentTarget.dataset.idx;
+		var sources = JSON.parse(JSON.stringify(this.data.sources));
+		var newEnabled = !sources[idx].enabled;
 
-	hideAddSourceForm: function() {
-		this.setData({ showAddSource: false });
-	},
-
-	onNewSourceName: function(e) {
-		this.setData({ newSourceName: e.detail.value });
-	},
-
-	onNewSourceUrl: function(e) {
-		this.setData({ newSourceUrl: e.detail.value });
-	},
-
-	addSource: function() {
-		var name = this.data.newSourceName.trim();
-		var url = this.data.newSourceUrl.trim();
-		if (!name) {
-			util.showToast("请输入网站名称");
-			return;
-		}
-		if (!url) {
-			util.showToast("请输入网站地址");
-			return;
+		if (!newEnabled) {
+			var enabledCount = sources.filter(function(s) { return s.enabled; }).length;
+			if (enabledCount <= 1) {
+				util.showToast("至少启用一个数据来源");
+				return;
+			}
 		}
 
-		var id = "custom_" + Date.now();
-		var list = this.data.sources.slice();
-		list.push({ id: id, name: name, website: url });
-		this.setData({ sources: list, showAddSource: false });
-		this.saveSources();
+		sources[idx].enabled = newEnabled;
+		this.setData({ sources: sources });
+		this.saveSources(sources);
 	},
 
-	saveSources: function() {
-		var self = this;
-		self.syncDisplaySources(self.data.sources);
-		api.saveCustomSources(self.data.sources).then(function() {
+	saveSources: function(sources) {
+		// 只将启用的来源写入云端，crawl 云函数据此决定抓取范围
+		var enabled = sources
+			.filter(function(s) { return s.enabled; })
+			.map(function(s) { return { id: s.id, name: s.name }; });
+
+		// 同步本地缓存，让首页来源快捷栏立即反映变化
+		config.setDisplaySources(enabled);
+
+		api.saveCustomSources(enabled).then(function() {
 			util.showToast("已保存", "success");
 		}).catch(function(err) {
 			util.showToast("保存失败");
@@ -228,140 +164,53 @@ Page({
 		var self = this;
 		api.getCustomKeywords().then(function(data) {
 			var cats = (data && typeof data === "object") ? data : {};
-			cats = self.ensureDefaultKeywords(cats);
-			var names = Object.keys(cats);
-			self.setData({
-				keywordCategories: cats,
-				keywordCatNames: names,
-				keywordsLoaded: true
-			});
-			self.loadFollowedCats(names);
+			var keys = Object.keys(cats);
+
+			// 检测是否为旧的分层格式（每个 key 的 value 应只含自身一个词）
+			// 旧格式示例：{"色谱类": ["色谱", "液相色谱", ...]}
+			// 新格式示例：{"耗材": ["耗材"]}
+			var isOldFormat = false;
+			for (var i = 0; i < keys.length; i++) {
+				var words = cats[keys[i]];
+				if (!Array.isArray(words) || words.length !== 1 || words[0] !== keys[i]) {
+					isOldFormat = true;
+					break;
+				}
+			}
+
+			var keywords;
+			if (keys.length === 0 || isOldFormat) {
+				// 无数据或旧格式，重置为默认并静默写入云端
+				keywords = config.getDefaultKeywords();
+				var resetCats = {};
+				for (var j = 0; j < keywords.length; j++) {
+					resetCats[keywords[j]] = [keywords[j]];
+				}
+				api.saveCustomKeywords(resetCats).catch(function() {});
+				api.saveFollowedCategories(keywords).catch(function() {});
+			} else {
+				keywords = keys;
+			}
+
+			self._applyKeywords(keywords);
 		}).catch(function(err) {
 			console.error("加载设备关键字失败:", err);
-			var cats = {};
-			cats[config.getDefaultKeywordCategory()] = config.getDefaultKeywords();
-			var names = Object.keys(cats);
-			self.setData({
-				keywordCategories: cats,
-				keywordCatNames: names,
-				keywordsLoaded: true
-			});
-			self.loadFollowedCats(names);
+			self._applyKeywords(config.getDefaultKeywords());
 		});
 	},
 
-	loadFollowedCats: function(catNames) {
-		var self = this;
-		api.getFollowedCategories().then(function(data) {
-			var followed = (data && Array.isArray(data) && data.length > 0) ? data : config.getFollowedCategories();
-			config.setFollowedCategories(followed);
-			var map = {};
-			for (var i = 0; i < catNames.length; i++) {
-				map[catNames[i]] = followed.indexOf(catNames[i]) !== -1;
-			}
-			self.setData({ followedCats: map });
-		}).catch(function() {
-			var followed = config.getFollowedCategories();
-			var map = {};
-			for (var i = 0; i < catNames.length; i++) {
-				map[catNames[i]] = followed.indexOf(catNames[i]) !== -1;
-			}
-			self.setData({ followedCats: map });
-		});
+	// 将关键字列表应用到本地状态，并同步 followedCats
+	_applyKeywords: function(keywords) {
+		config.setFollowedCategories(keywords);
+		this.setData({ keywords: keywords, keywordsLoaded: true });
 	},
 
-	toggleCatFollow: function(e) {
-		var cat = e.currentTarget.dataset.cat;
-		var current = this.data.followedCats[cat];
-
-		if (current) {
-			var followed = config.getFollowedCategories();
-			if (followed.length <= 1) {
-				util.showToast("至少关注一个分类");
-				return;
-			}
-		}
-
-		var key = "followedCats." + cat;
-		var newVal = !current;
-		this.setData({ [key]: newVal });
-
-		var list = [];
-		var cats = this.data.followedCats;
-		var names = this.data.keywordCatNames;
-		for (var i = 0; i < names.length; i++) {
-			if (cats[names[i]]) {
-				list.push(names[i]);
-			}
-		}
-		config.setFollowedCategories(list);
-		api.saveFollowedCategories(list).catch(function(err) {
-			console.error("保存关注分类到云端失败:", err);
-		});
-		util.showToast(newVal ? "已关注" : "已取消关注", "success");
-	},
-
-	ensureDefaultKeywords: function(cats) {
-		var defaultCat = config.getDefaultKeywordCategory();
-		var defaultWords = config.getDefaultKeywords();
-		if (!cats[defaultCat]) {
-			cats[defaultCat] = defaultWords;
-		} else {
-			for (var i = 0; i < defaultWords.length; i++) {
-				if (cats[defaultCat].indexOf(defaultWords[i]) === -1) {
-					cats[defaultCat].push(defaultWords[i]);
-				}
-			}
-		}
-		return cats;
-	},
-
-	toggleCatExpand: function(e) {
-		var cat = e.currentTarget.dataset.cat;
-		var key = "expandedCats." + cat;
-		this.setData({ [key]: !this.data.expandedCats[cat] });
-	},
-
-	deleteKeyword: function(e) {
-		var cat = e.currentTarget.dataset.cat;
-		var word = e.currentTarget.dataset.word;
-		var self = this;
-
-		wx.showModal({
-			title: "删除关键字",
-			content: "确定从「" + cat + "」中删除「" + word + "」？",
-			success: function(res) {
-				if (!res.confirm) {
-					return;
-				}
-				var cats = JSON.parse(JSON.stringify(self.data.keywordCategories));
-				var list = cats[cat];
-				if (!list) {
-					return;
-				}
-				var idx = list.indexOf(word);
-				if (idx !== -1) {
-					list.splice(idx, 1);
-				}
-				if (list.length === 0) {
-					delete cats[cat];
-				}
-				self.setData({
-					keywordCategories: cats,
-					keywordCatNames: Object.keys(cats)
-				});
-				self.saveKeywords();
-			}
-		});
-	},
-
-	showAddWordInput: function(e) {
-		var cat = e.currentTarget.dataset.cat;
-		this.setData({ addingWordCat: cat, newWord: "" });
+	showAddWordInput: function() {
+		this.setData({ addingWord: true, newWord: "" });
 	},
 
 	hideAddWordInput: function() {
-		this.setData({ addingWordCat: "", newWord: "" });
+		this.setData({ addingWord: false, newWord: "" });
 	},
 
 	onNewWordInput: function(e) {
@@ -369,110 +218,57 @@ Page({
 	},
 
 	addWord: function() {
-		var cat = this.data.addingWordCat;
 		var word = this.data.newWord.trim();
 		if (!word) {
 			util.showToast("请输入关键字");
 			return;
 		}
-
-		var cats = JSON.parse(JSON.stringify(this.data.keywordCategories));
-		if (!cats[cat]) {
-			cats[cat] = [];
-		}
-		if (cats[cat].indexOf(word) !== -1) {
+		if (this.data.keywords.indexOf(word) !== -1) {
 			util.showToast("关键字已存在");
 			return;
 		}
-		cats[cat].push(word);
-		this.setData({
-			keywordCategories: cats,
-			addingWordCat: "",
-			newWord: ""
-		});
-		this.saveKeywords();
+		var keywords = this.data.keywords.slice();
+		keywords.push(word);
+		this.setData({ addingWord: false, newWord: "" });
+		this.saveKeywords(keywords);
 	},
 
-	showAddCategoryForm: function() {
-		this.setData({ showAddCategory: true, newCatName: "" });
-	},
-
-	hideAddCategoryForm: function() {
-		this.setData({ showAddCategory: false });
-	},
-
-	onNewCatName: function(e) {
-		this.setData({ newCatName: e.detail.value });
-	},
-
-	addCategory: function() {
-		var name = this.data.newCatName.trim();
-		if (!name) {
-			util.showToast("请输入分类名称");
-			return;
-		}
-		if (this.data.keywordCategories[name]) {
-			util.showToast("分类已存在");
-			return;
-		}
-
-		var cats = JSON.parse(JSON.stringify(this.data.keywordCategories));
-		cats[name] = [];
-		this.setData({
-			keywordCategories: cats,
-			keywordCatNames: Object.keys(cats),
-			showAddCategory: false,
-			addingWordCat: name,
-			newWord: ""
-		});
-		this.saveKeywords();
-	},
-
-	deleteCategory: function(e) {
-		var cat = e.currentTarget.dataset.cat;
+	deleteWord: function(e) {
+		var word = e.currentTarget.dataset.word;
 		var self = this;
-
-		if (self.data.keywordCatNames.length <= 1) {
-			util.showToast("至少保留一个分类");
+		if (self.data.keywords.length <= 1) {
+			util.showToast("至少保留一个关键字");
 			return;
 		}
-
 		wx.showModal({
-			title: "删除分类",
-			content: "确定删除整个「" + cat + "」分类及其所有设备关键字？",
+			title: "删除关键字",
+			content: "确定删除「" + word + "」？",
 			success: function(res) {
 				if (!res.confirm) {
 					return;
 				}
-				var cats = JSON.parse(JSON.stringify(self.data.keywordCategories));
-				delete cats[cat];
-				var names = Object.keys(cats);
-				self.setData({
-					keywordCategories: cats,
-					keywordCatNames: names
-				});
-				self.saveKeywords();
-
-				if (self.data.followedCats[cat]) {
-					var key = "followedCats." + cat;
-					self.setData({ [key]: false });
-					var list = [];
-					for (var i = 0; i < names.length; i++) {
-						if (self.data.followedCats[names[i]]) {
-							list.push(names[i]);
-						}
-					}
-					config.setFollowedCategories(list);
-					api.saveFollowedCategories(list).catch(function(err) {
-						console.error("保存关注分类到云端失败:", err);
-					});
+				var keywords = self.data.keywords.slice();
+				var idx = keywords.indexOf(word);
+				if (idx !== -1) {
+					keywords.splice(idx, 1);
 				}
+				self.saveKeywords(keywords);
 			}
 		});
 	},
 
-	saveKeywords: function() {
-		api.saveCustomKeywords(this.data.keywordCategories).then(function() {
+	saveKeywords: function(keywords) {
+		var self = this;
+		// 每个关键字是自己的类别：{word: [word]}
+		var cats = {};
+		for (var i = 0; i < keywords.length; i++) {
+			cats[keywords[i]] = [keywords[i]];
+		}
+		self._applyKeywords(keywords);
+		api.saveFollowedCategories(keywords).catch(function(err) {
+			console.error("保存关注分类失败:", err);
+		});
+		api.saveCustomKeywords(cats).then(function() {
 			util.showToast("已保存", "success");
 		}).catch(function(err) {
 			util.showToast("保存失败");
@@ -488,21 +284,18 @@ Page({
 			if (data && typeof data === "object") {
 				var intervalIdx = self.data.intervalOptions.indexOf(data.intervalHours);
 				if (intervalIdx === -1) {
-					intervalIdx = 7;
+					intervalIdx = 0;
 				}
 				var dayMap = { "all": 0, "workday": 1, "weekend": 2 };
-				var dayIdx = dayMap[data.dayType] || 0;
-				var hIdx = data.startHour || 0;
-				var mIdx = Math.floor((data.startMinute || 0) / 5);
-
+				var dayIdx = (dayMap[data.dayType] !== undefined) ? dayMap[data.dayType] : 0;
 				self.setData({
 					schedule: data,
 					scheduleLoaded: true,
 					intervalIndex: intervalIdx,
-					dayTypeIndex: dayIdx,
-					hourIndex: hIdx,
-					minuteIndex: mIdx
+					dayTypeIndex: dayIdx
 				});
+			} else {
+				self.setData({ scheduleLoaded: true });
 			}
 		}).catch(function(err) {
 			console.error("加载抓取策略失败:", err);
@@ -511,17 +304,15 @@ Page({
 	},
 
 	toggleScheduleEnabled: function(e) {
-		var val = e.detail.value;
-		this.setData({ "schedule.enabled": val });
+		this.setData({ "schedule.enabled": e.detail.value });
 		this.saveSchedule();
 	},
 
 	onIntervalChange: function(e) {
 		var idx = parseInt(e.detail.value, 10);
-		var val = this.data.intervalOptions[idx];
 		this.setData({
 			intervalIndex: idx,
-			"schedule.intervalHours": val
+			"schedule.intervalHours": this.data.intervalOptions[idx]
 		});
 		this.saveSchedule();
 	},
@@ -536,63 +327,9 @@ Page({
 		this.saveSchedule();
 	},
 
-	onStartHourChange: function(e) {
-		var idx = parseInt(e.detail.value, 10);
-		this.setData({
-			hourIndex: idx,
-			"schedule.startHour": idx
-		});
-		this.saveSchedule();
-	},
-
-	onStartMinuteChange: function(e) {
-		var idx = parseInt(e.detail.value, 10);
-		this.setData({
-			minuteIndex: idx,
-			"schedule.startMinute": idx * 5
-		});
-		this.saveSchedule();
-	},
-
 	saveSchedule: function() {
 		api.saveSchedule(this.data.schedule).then(function() {
 			util.showToast("策略已保存", "success");
-		}).catch(function(err) {
-			util.showToast("保存失败");
-			console.error(err);
-		});
-	},
-
-	/* ========== 数据保留期 ========== */
-
-	loadRetention: function() {
-		var self = this;
-		api.getRetention().then(function(days) {
-			if (typeof days === "number" && days > 0) {
-				var idx = self.data.retentionOptions.indexOf(days);
-				if (idx === -1) {
-					idx = 2;
-				}
-				self.setData({
-					retentionDays: days,
-					retentionIndex: idx
-				});
-			}
-		}).catch(function(err) {
-			console.error("加载数据保留期失败:", err);
-		});
-	},
-
-	onRetentionChange: function(e) {
-		var idx = parseInt(e.detail.value, 10);
-		var days = this.data.retentionOptions[idx];
-		this.setData({
-			retentionIndex: idx,
-			retentionDays: days
-		});
-
-		api.saveRetention(days).then(function() {
-			util.showToast("已保存", "success");
 		}).catch(function(err) {
 			util.showToast("保存失败");
 			console.error(err);
@@ -664,8 +401,6 @@ Page({
 
 					if (result && result.code === 0) {
 						var data = result.data || {};
-						var followed = config.getFollowedCategories();
-						var catLabel = followed.length > 0 ? followed[0] : "关注分类";
 						var msg = "新增 " + (data.newItems || 0) + " 条数据\n关键字命中 " + (data.matchedItems || 0) + " 条\n耗时 " + Math.round((data.duration || 0) / 1000) + " 秒";
 						if (data.errors && data.errors.length > 0) {
 							msg += "\n\n注意: " + data.errors.length + " 个错误";

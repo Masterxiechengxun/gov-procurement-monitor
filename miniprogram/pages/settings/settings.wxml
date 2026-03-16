@@ -12,34 +12,22 @@
 			</view>
 			<view>
 				<text class="se-card-title">采购网站</text>
-				<text class="se-card-desc">管理需要抓取的采购网站</text>
+				<text class="se-card-desc">选择需要抓取数据的来源网站</text>
 			</view>
 		</view>
 
-		<view class="se-source-list">
-			<view wx:for="{{sources}}" wx:key="id" class="se-source-row">
-			<view class="se-source-info">
-				<text class="se-source-name">{{item.name}}</text>
-				<text class="se-source-url">{{item.website}}</text>
-			</view>
-			<view class="se-del-btn" catchtap="deleteSource" data-idx="{{index}}">
-					<text>删除</text>
+		<view wx:for="{{sources}}" wx:key="id" class="se-source-item {{index < sources.length - 1 ? 'se-source-item-border' : ''}}">
+			<view class="se-source-left {{!item.enabled ? 'se-source-left-off' : ''}}">
+				<view class="se-source-name-row">
+					<text class="se-source-name">{{item.name}}</text>
+					<text wx:if="{{item.enabled}}" class="se-source-tag se-source-tag-on">抓取中</text>
+					<text wx:else class="se-source-tag se-source-tag-off">已停用</text>
 				</view>
+				<text class="se-source-url">{{item.website}}</text>
+				<text class="se-source-desc">{{item.desc}}</text>
 			</view>
+			<switch checked="{{item.enabled}}" bindchange="toggleSource" data-idx="{{index}}" color="#2563EB" style="transform:scale(0.85);margin-left:12rpx;" />
 		</view>
-
-		<view wx:if="{{showAddSource}}" class="se-add-form">
-			<input class="se-add-input" placeholder="网站名称" placeholder-style="color:#94A3B8;" value="{{newSourceName}}" bindinput="onNewSourceName" />
-			<input class="se-add-input" placeholder="网站地址（https://...）" placeholder-style="color:#94A3B8;" value="{{newSourceUrl}}" bindinput="onNewSourceUrl" />
-			<view class="se-form-btns">
-				<view class="se-fbtn se-fbtn-cancel" bindtap="hideAddSourceForm"><text>取消</text></view>
-				<view class="se-fbtn se-fbtn-ok" bindtap="addSource"><text>添加</text></view>
-			</view>
-		</view>
-	<view wx:else class="se-add-trigger" bindtap="showAddSourceForm">
-		<text class="se-add-plus">+</text>
-		<text>添加网站</text>
-	</view>
 	</view>
 
 	<!-- 设备关键字 -->
@@ -55,54 +43,26 @@
 			</view>
 			<view>
 				<text class="se-card-title">设备关键字</text>
-				<text class="se-card-desc">管理采购信息匹配的设备关键字</text>
+				<text class="se-card-desc">每个关键字对应一个筛选分类</text>
 			</view>
 		</view>
 
-		<view class="se-kw-cats">
-			<view wx:for="{{keywordCatNames}}" wx:key="*this" class="se-kw-cat">
-			<view class="se-kw-cat-hd" bindtap="toggleCatExpand" data-cat="{{item}}">
-				<text class="se-kw-cat-name">{{item}}</text>
-				<view class="se-kw-cat-right">
-					<view class="se-follow-btn {{followedCats[item] ? 'se-follow-btn-active' : ''}}" catchtap="toggleCatFollow" data-cat="{{item}}">
-						<text>{{followedCats[item] ? '已关注' : '关注'}}</text>
-					</view>
-					<text class="se-kw-cat-count">{{keywordCategories[item].length}}</text>
-					<view class="se-arrow {{expandedCats[item] ? 'se-arrow-up' : ''}}"></view>
-				</view>
-			</view>
-
-				<view wx:if="{{expandedCats[item]}}" class="se-kw-body">
-					<view class="se-kw-chips">
-						<view wx:for="{{keywordCategories[item]}}" wx:for-item="word" wx:key="*this" class="se-kw-chip">
-							<text>{{word}}</text>
-							<text class="se-kw-chip-del" catchtap="deleteKeyword" data-cat="{{item}}" data-word="{{word}}">×</text>
-						</view>
-					</view>
-					<view wx:if="{{addingWordCat === item}}" class="se-kw-add-row">
-						<input class="se-kw-add-input" placeholder="输入新设备关键字" placeholder-style="color:#94A3B8;" value="{{newWord}}" bindinput="onNewWordInput" focus="true" confirm-type="done" bindconfirm="addWord" />
-						<view class="se-fbtn se-fbtn-ok se-fbtn-mini" catchtap="addWord"><text>添加</text></view>
-						<view class="se-fbtn se-fbtn-cancel se-fbtn-mini" catchtap="hideAddWordInput"><text>取消</text></view>
-					</view>
-					<view wx:else class="se-kw-footer">
-						<text class="se-kw-add-link" catchtap="showAddWordInput" data-cat="{{item}}">+ 添加关键字</text>
-						<text class="se-kw-del-cat" catchtap="deleteCategory" data-cat="{{item}}">删除分类</text>
-					</view>
-				</view>
+		<view class="se-kw-chips">
+			<view wx:for="{{keywords}}" wx:key="*this" class="se-kw-chip">
+				<text>{{item}}</text>
+				<text class="se-kw-chip-del" catchtap="deleteWord" data-word="{{item}}">×</text>
 			</view>
 		</view>
 
-		<view wx:if="{{showAddCategory}}" class="se-add-form">
-			<input class="se-add-input" placeholder="新分类名称（如：环境监测）" placeholder-style="color:#94A3B8;" value="{{newCatName}}" bindinput="onNewCatName" focus="true" />
-			<view class="se-form-btns">
-				<view class="se-fbtn se-fbtn-cancel" bindtap="hideAddCategoryForm"><text>取消</text></view>
-				<view class="se-fbtn se-fbtn-ok" bindtap="addCategory"><text>创建分类</text></view>
-			</view>
+		<view wx:if="{{addingWord}}" class="se-kw-add-row">
+			<input class="se-kw-add-input" placeholder="输入新关键字" placeholder-style="color:#94A3B8;" value="{{newWord}}" bindinput="onNewWordInput" focus="true" confirm-type="done" bindconfirm="addWord" />
+			<view class="se-fbtn se-fbtn-ok se-fbtn-mini" catchtap="addWord"><text>添加</text></view>
+			<view class="se-fbtn se-fbtn-cancel se-fbtn-mini" catchtap="hideAddWordInput"><text>取消</text></view>
 		</view>
-	<view wx:else class="se-add-trigger" bindtap="showAddCategoryForm">
-		<text class="se-add-plus">+</text>
-		<text>添加设备关键字分类</text>
-	</view>
+		<view wx:else class="se-add-trigger" bindtap="showAddWordInput">
+			<text class="se-add-plus">+</text>
+			<text>添加关键字</text>
+		</view>
 	</view>
 
 	<!-- 自动抓取策略 -->
@@ -119,42 +79,58 @@
 			</view>
 			<view>
 				<text class="se-card-title">自动抓取策略</text>
-				<text class="se-card-desc">设置抓取时间和频率</text>
+				<text class="se-card-desc">云函数定时触发，可控制执行频率</text>
 			</view>
 		</view>
 
-		<view class="se-row">
-			<text class="se-row-label">启用自动抓取</text>
-			<switch checked="{{schedule.enabled}}" bindchange="toggleScheduleEnabled" color="#2563EB" />
+		<!-- 系统触发器（只读） -->
+		<view class="se-subsection">
+			<view class="se-subsection-hd">
+				<text class="se-subsection-title">系统触发器</text>
+				<text class="se-badge se-badge-sys">系统固定</text>
+			</view>
+			<view class="se-trigger-row">
+				<text class="se-trigger-name">列表抓取</text>
+				<text class="se-trigger-val">每小时整点</text>
+			</view>
+			<view class="se-trigger-row">
+				<text class="se-trigger-name">详情补抓</text>
+				<text class="se-trigger-val">每小时第 5 分钟</text>
+			</view>
+			<view class="se-trigger-row se-trigger-row-last">
+				<text class="se-trigger-name">数据清理</text>
+				<text class="se-trigger-val">每周日凌晨 3 点</text>
+			</view>
 		</view>
-		<view class="se-row">
-			<text class="se-row-label">抓取间隔</text>
-			<picker range="{{intervalOptions}}" value="{{intervalIndex}}" bindchange="onIntervalChange">
-				<view class="se-picker">每 {{intervalOptions[intervalIndex]}} 小时</view>
-			</picker>
-		</view>
-		<view class="se-row">
-			<text class="se-row-label">执行日期</text>
-			<picker range="{{dayTypeOptions}}" value="{{dayTypeIndex}}" bindchange="onDayTypeChange">
-				<view class="se-picker">{{dayTypeOptions[dayTypeIndex]}}</view>
-			</picker>
-		</view>
-		<view class="se-row se-row-last">
-			<text class="se-row-label">首次执行时间</text>
-			<view class="se-time-group">
-				<picker range="{{hourOptions}}" value="{{hourIndex}}" bindchange="onStartHourChange">
-					<view class="se-picker se-picker-sm">{{hourOptions[hourIndex]}}时</view>
+
+		<!-- 执行控制（可编辑） -->
+		<view class="se-subsection se-subsection-ctrl">
+			<view class="se-subsection-hd">
+				<text class="se-subsection-title">执行控制</text>
+				<text class="se-badge se-badge-ctrl">可自定义</text>
+			</view>
+			<view class="se-row">
+				<text class="se-row-label">启用自动抓取</text>
+				<switch checked="{{schedule.enabled}}" bindchange="toggleScheduleEnabled" color="#2563EB" />
+			</view>
+			<view class="se-row {{!schedule.enabled ? 'se-row-dim' : ''}}">
+				<text class="se-row-label">抓取间隔</text>
+				<picker range="{{intervalOptions}}" value="{{intervalIndex}}" bindchange="onIntervalChange" disabled="{{!schedule.enabled}}">
+					<view class="se-picker {{!schedule.enabled ? 'se-picker-dim' : ''}}">每 {{intervalOptions[intervalIndex]}} 小时</view>
 				</picker>
-				<text class="se-time-sep">:</text>
-				<picker range="{{minuteOptions}}" value="{{minuteIndex}}" bindchange="onStartMinuteChange">
-					<view class="se-picker se-picker-sm">{{minuteOptions[minuteIndex]}}分</view>
+			</view>
+			<view class="se-row se-row-last {{!schedule.enabled ? 'se-row-dim' : ''}}">
+				<text class="se-row-label">执行日期</text>
+				<picker range="{{dayTypeOptions}}" value="{{dayTypeIndex}}" bindchange="onDayTypeChange" disabled="{{!schedule.enabled}}">
+					<view class="se-picker {{!schedule.enabled ? 'se-picker-dim' : ''}}">{{dayTypeOptions[dayTypeIndex]}}</view>
 				</picker>
 			</view>
 		</view>
 
-		<view class="se-summary {{schedule.enabled ? 'se-summary-on' : ''}}">
-			<text wx:if="{{schedule.enabled}}">{{dayTypeOptions[dayTypeIndex]}} {{hourOptions[hourIndex]}}:{{minuteOptions[minuteIndex]}} 起，每 {{intervalOptions[intervalIndex]}} 小时执行</text>
-			<text wx:else>自动抓取已关闭</text>
+		<!-- 当前生效摘要 -->
+		<view class="se-schedule-summary {{schedule.enabled ? 'se-schedule-summary-on' : ''}}">
+			<text wx:if="{{schedule.enabled}}">当前策略：{{dayTypeOptions[dayTypeIndex]}}，每 {{intervalOptions[intervalIndex]}} 小时触发一次抓取</text>
+			<text wx:else>自动抓取已关闭，仅支持手动触发</text>
 		</view>
 	</view>
 
@@ -273,15 +249,8 @@
 			</view>
 			<view>
 				<text class="se-card-title">数据管理</text>
-				<text class="se-card-desc">管理采购数据的保留期限</text>
+				<text class="se-card-desc">云开发数据库使用情况</text>
 			</view>
-		</view>
-
-		<view class="se-row se-row-last">
-			<text class="se-row-label">数据保留天数</text>
-			<picker range="{{retentionOptions}}" value="{{retentionIndex}}" bindchange="onRetentionChange">
-				<view class="se-picker">{{retentionOptions[retentionIndex]}} 天</view>
-			</picker>
 		</view>
 
 		<view wx:if="{{storageInfo}}" class="se-storage">
