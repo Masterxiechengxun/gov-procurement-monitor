@@ -2,7 +2,6 @@
 	"pages": [
 		"pages/index/index",
 		"pages/stats/stats",
-		"pages/detail/detail",
 		"pages/filter/filter",
 		"pages/settings/settings"
 	],

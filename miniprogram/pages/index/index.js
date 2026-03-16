@@ -224,9 +224,24 @@ Page({
 
 	onCardTap: function(e) {
 		var item = e.detail.item;
-		wx.navigateTo({
-			url: "/pages/detail/detail?url=" + encodeURIComponent(item.url || "") +
-				 "&title=" + encodeURIComponent(item.title || "招标详情")
+		var url = item.url || "";
+		if (!url) {
+			wx.showToast({
+				title: "暂无链接",
+				icon: "none"
+			});
+			return;
+		}
+		wx.setClipboardData({
+			data: url,
+			success: function() {
+				wx.showModal({
+					title: "查看详情",
+					content: "链接已复制到剪贴板，请打开手机浏览器粘贴访问",
+					showCancel: false,
+					confirmText: "知道了"
+				});
+			}
 		});
 	}
 });
