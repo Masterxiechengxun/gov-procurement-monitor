@@ -180,6 +180,27 @@ function triggerCrawl() {
 	});
 }
 
+function fetchPageDetail(url) {
+	return new Promise(function(resolve, reject) {
+		wx.cloud.callFunction({
+			name: "getDetail",
+			data: { url: url },
+			timeout: 20000,
+			success: function(res) {
+				if (res.result && res.result.code === 0) {
+					resolve(res.result.data);
+				} else {
+					var msg = (res.result && res.result.message) || "获取详情失败";
+					reject(new Error(msg));
+				}
+			},
+			fail: function(err) {
+				reject(err);
+			}
+		});
+	});
+}
+
 module.exports = {
 	callCloud: callCloud,
 	getList: getList,
@@ -203,5 +224,6 @@ module.exports = {
 	getBlacklistKeywords: getBlacklistKeywords,
 	saveBlacklistKeywords: saveBlacklistKeywords,
 	getAnalytics: getAnalytics,
-	triggerCrawl: triggerCrawl
+	triggerCrawl: triggerCrawl,
+	fetchPageDetail: fetchPageDetail
 };

@@ -1,0 +1,111 @@
+<view class="page">
+	<!-- 基本信息卡片 -->
+	<view class="meta-card">
+		<text class="title">{{item.title}}</text>
+		<view class="meta-row">
+			<text class="meta-tag">{{item.bidType || item.sourceName}}</text>
+			<text class="meta-date">{{item.publishDate}}</text>
+		</view>
+		<view class="meta-fields" wx:if="{{item.buyer || item.agent || item.region}}">
+			<view class="meta-field" wx:if="{{item.buyer}}">
+				<text class="field-label">采购人</text>
+				<text class="field-val">{{item.buyer}}</text>
+			</view>
+			<view class="meta-field" wx:if="{{item.agent}}">
+				<text class="field-label">代理机构</text>
+				<text class="field-val">{{item.agent}}</text>
+			</view>
+			<view class="meta-field" wx:if="{{item.region}}">
+				<text class="field-label">地区</text>
+				<text class="field-val">{{item.region}}</text>
+			</view>
+		</view>
+		<view class="copy-link-row" bindtap="onCopyUrl">
+			<view class="copy-icon">
+				<view class="copy-icon-inner"></view>
+				<view class="copy-icon-corner"></view>
+			</view>
+			<text class="copy-link-txt">复制原始链接</text>
+		</view>
+	</view>
+
+	<!-- 加载状态 -->
+	<view wx:if="{{loading}}" class="loading-card">
+		<view class="spinner">
+			<view class="spinner-dot d1"></view>
+			<view class="spinner-dot d2"></view>
+			<view class="spinner-dot d3"></view>
+		</view>
+		<text class="loading-txt">正在加载公告内容...</text>
+	</view>
+
+	<!-- 错误状态 -->
+	<view wx:elif="{{error}}" class="error-card">
+		<text class="error-icon">!</text>
+		<text class="error-msg">{{errorMsg}}</text>
+		<view class="error-btns">
+			<view class="btn-retry" bindtap="onRetry">
+				<text>重新加载</text>
+			</view>
+			<view class="btn-copy" bindtap="onCopyUrl">
+				<text>复制链接</text>
+			</view>
+		</view>
+	</view>
+
+	<!-- 正文内容 -->
+	<view wx:elif="{{paragraphs.length > 0}}" class="content-card">
+		<view class="section-title">公告正文</view>
+		<view class="paragraphs">
+			<block wx:for="{{paragraphs}}" wx:for-item="para" wx:key="index">
+				<text
+					wx:if="{{para.type === 'heading'}}"
+					class="para-heading"
+					user-select="true"
+				>{{para.text}}</text>
+				<text
+					wx:elif="{{para.type === 'table-row'}}"
+					class="para-table-row"
+					user-select="true"
+				>{{para.text}}</text>
+				<text
+					wx:else
+					class="para-text"
+					user-select="true"
+				>{{para.text}}</text>
+			</block>
+		</view>
+	</view>
+
+	<!-- 内容为空状态 -->
+	<view wx:elif="{{!loading && !error}}" class="empty-content-card">
+		<text class="empty-hint">未能解析到公告正文内容</text>
+		<view class="btn-copy" bindtap="onCopyUrl" style="margin-top:24rpx;">
+			<text>复制链接在浏览器查看</text>
+		</view>
+	</view>
+
+	<!-- 附件区域 -->
+	<view wx:if="{{!loading && attachments.length > 0}}" class="attach-card">
+		<view class="section-title">相关附件</view>
+		<view class="attach-list">
+			<view
+				wx:for="{{attachments}}"
+				wx:for-item="attach"
+				wx:key="url"
+				class="attach-item"
+				bindtap="onOpenAttachment"
+				data-url="{{attach.url}}"
+				data-name="{{attach.name}}"
+			>
+				<view class="attach-icon-wrap">
+					<view class="attach-icon"></view>
+				</view>
+				<text class="attach-name">{{attach.name}}</text>
+				<view class="attach-arrow"></view>
+			</view>
+		</view>
+	</view>
+
+	<view class="page-bottom-gap"></view>
+</view>

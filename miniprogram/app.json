@@ -3,7 +3,8 @@
 		"pages/index/index",
 		"pages/stats/stats",
 		"pages/filter/filter",
-		"pages/settings/settings"
+		"pages/settings/settings",
+		"pages/detail/detail"
 	],
 	"window": {
 		"backgroundColor": "#F1F5F9",
