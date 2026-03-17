@@ -1,5 +1,14 @@
 # 详情页 web-view 改造 Implementation Plan
 
+> ⚠️ **已废弃（2026-03-17）**
+>
+> 此方案（web-view + cover-view）因政府网站域名无法加入业务域名白名单而放弃。
+> 实际采用的是**云函数抓取 + 原生渲染**方案，详见：
+> - `docs/webview-proxy-solution.md`（方案对比与当前实现说明）
+> - `docs/superpowers/specs/2026-03-17-detail-page-cloudfunction-rendering.md`（当前实现 spec）
+
+---
+
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 将采购详情页从小程序内渲染改为 web-view 直接加载原始 URL，移除 fetchDetail 云函数，添加带"返回"和"用浏览器打开"按钮的自定义顶部导航栏。
