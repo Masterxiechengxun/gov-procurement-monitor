@@ -3,8 +3,7 @@ var api = require("../../utils/api");
 Page({
 	data: {
 		item: {},
-		paragraphs: [],
-		attachments: [],
+		htmlContent: "",
 		loading: true,
 		error: false,
 		errorMsg: ""
@@ -33,8 +32,7 @@ Page({
 		api.fetchPageDetail(url)
 			.then(function(data) {
 				self.setData({
-					paragraphs: data.paragraphs || [],
-					attachments: data.attachments || [],
+					htmlContent: data.html || "",
 					loading: false
 				});
 			})
@@ -69,50 +67,5 @@ Page({
 		});
 	},
 
-	onOpenAttachment: function(e) {
-		var url = e.currentTarget.dataset.url;
-		var name = e.currentTarget.dataset.name || "附件";
-		if (!url) return;
-
-		// PDF/DOC 等文件：先下载再用微信内置阅读器打开
-		var isPdf = /\.pdf(\?.*)?$/i.test(url);
-		var isDoc = /\.(doc|docx|xls|xlsx)(\?.*)?$/i.test(url);
-
-		if (isPdf || isDoc) {
-			wx.showLoading({ title: "下载中..." });
-			wx.downloadFile({
-				url: url,
-				success: function(res) {
-					wx.hideLoading();
-					if (res.statusCode === 200) {
-						wx.openDocument({
-							filePath: res.tempFilePath,
-							showMenu: true,
-							fail: function() {
-								wx.showToast({ title: "无法打开文件", icon: "none" });
-							}
-						});
-					}
-				},
-				fail: function() {
-					wx.hideLoading();
-					// 下载失败降级为复制链接
-					wx.setClipboardData({
-						data: url,
-						success: function() {
-							wx.showToast({ title: "下载失败，链接已复制", icon: "none", duration: 2500 });
-						}
-					});
-				}
-			});
-		} else {
-			// 其他类型：复制链接
-			wx.setClipboardData({
-				data: url,
-				success: function() {
-					wx.showToast({ title: "链接已复制", icon: "success" });
-				}
-			});
-		}
-	}
 });
+

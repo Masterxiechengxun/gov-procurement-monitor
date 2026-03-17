@@ -54,27 +54,8 @@
 	</view>
 
 	<!-- 正文内容 -->
-	<view wx:elif="{{paragraphs.length > 0}}" class="content-card">
-		<view class="section-title">公告正文</view>
-		<view class="paragraphs">
-			<block wx:for="{{paragraphs}}" wx:for-item="para" wx:key="index">
-				<text
-					wx:if="{{para.type === 'heading'}}"
-					class="para-heading"
-					user-select="true"
-				>{{para.text}}</text>
-				<text
-					wx:elif="{{para.type === 'table-row'}}"
-					class="para-table-row"
-					user-select="true"
-				>{{para.text}}</text>
-				<text
-					wx:else
-					class="para-text"
-					user-select="true"
-				>{{para.text}}</text>
-			</block>
-		</view>
+	<view wx:elif="{{htmlContent}}" class="content-card">
+		<rich-text nodes="{{htmlContent}}" class="rich-content" user-select="true"></rich-text>
 	</view>
 
 	<!-- 内容为空状态 -->
@@ -82,28 +63,6 @@
 		<text class="empty-hint">未能解析到公告正文内容</text>
 		<view class="btn-copy" bindtap="onCopyUrl" style="margin-top:24rpx;">
 			<text>复制链接在浏览器查看</text>
-		</view>
-	</view>
-
-	<!-- 附件区域 -->
-	<view wx:if="{{!loading && attachments.length > 0}}" class="attach-card">
-		<view class="section-title">相关附件</view>
-		<view class="attach-list">
-			<view
-				wx:for="{{attachments}}"
-				wx:for-item="attach"
-				wx:key="url"
-				class="attach-item"
-				bindtap="onOpenAttachment"
-				data-url="{{attach.url}}"
-				data-name="{{attach.name}}"
-			>
-				<view class="attach-icon-wrap">
-					<view class="attach-icon"></view>
-				</view>
-				<text class="attach-name">{{attach.name}}</text>
-				<view class="attach-arrow"></view>
-			</view>
 		</view>
 	</view>
 

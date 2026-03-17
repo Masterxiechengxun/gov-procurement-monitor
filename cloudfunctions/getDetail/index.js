@@ -35,8 +35,8 @@ exports.main = function(event) {
 
 	return fetchPage(url)
 		.then(function(html) {
-			var result = parseDetail(html, url);
-			console.log("[getDetail] 解析完成, 段落数=" + result.paragraphs.length + ", 附件数=" + result.attachments.length);
+			var result = extractHtml(html);
+			console.log("[getDetail] 解析完成, HTML长度=" + result.html.length);
 			return { code: 0, message: "success", data: result };
 		})
 		.catch(function(err) {
@@ -68,24 +68,37 @@ function fetchPage(url) {
 	});
 }
 
-function parseDetail(html, pageUrl) {
+function extractHtml(html) {
 	var $ = cheerio.load(html, { decodeEntities: false });
 
 	// 移除干扰元素
-	$("script, style, nav, header, footer, .navbar, .breadcrumb, #breadcrumb, .sidebar, #sidebar, .menu, #menu, .comment, #comment").remove();
+	$("script, style, nav, header, footer, .navbar, .breadcrumb, #breadcrumb, .sidebar, #sidebar, .menu, #menu, .comment, #comment, iframe, object, embed").remove();
 
-	// 找到正文区域（取文本最长的匹配）
+	// 找到正文区域
 	var $content = findContentElement($);
 
-	// 提取段落
-	var paragraphs = extractParagraphs($content, $);
+	// 移除只含空白/&nbsp; 的空段落（消除大量空行）
+	$content.find("p, br + br").each(function() {
+		var text = $(this).text().replace(/[\s\u00a0]+/g, "");
+		if (!text && !$(this).find("img, table").length) {
+			$(this).remove();
+		}
+	});
 
-	// 提取附件链接
-	var attachments = extractAttachments($, pageUrl);
+	// 修复表格超宽：移除固定宽度，强制自适应，允许换行
+	$content.find("table").each(function() {
+		$(this).removeAttr("width").attr("style", "width:100%;max-width:100%;table-layout:fixed;word-break:break-all;");
+	});
+	$content.find("td, th").each(function() {
+		$(this).removeAttr("width").removeAttr("nowrap").attr("style", "word-break:break-all;white-space:normal;");
+	});
+	$content.find("img").each(function() {
+		$(this).removeAttr("width").removeAttr("height").attr("style", "max-width:100%;height:auto;");
+	});
 
+	// 返回正文区域的原始 HTML
 	return {
-		paragraphs: paragraphs.slice(0, 150),
-		attachments: attachments.slice(0, 20)
+		html: $content.html() || ""
 	};
 }
 

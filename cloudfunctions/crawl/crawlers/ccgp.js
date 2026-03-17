@@ -222,9 +222,19 @@ function parseMetaText(text) {
 	for (var i = 0; i < parts.length; i++) {
 		var part = parts[i].trim();
 		if (part.indexOf("采购人") !== -1) {
-			info.buyer = part.replace(/采购人[：:]\s*/, "").trim();
+			// 取第一行，防止 <strong>bidType</strong> 混入
+			info.buyer = part.replace(/采购人[：:]\s*/, "").split(/[\r\n]+/)[0].trim();
 		} else if (part.indexOf("代理机构") !== -1) {
-			info.agent = part.replace(/代理机构[：:]\s*/, "").trim();
+			// 取第一行，防止 <br><strong>bidType</strong> 跟在代理机构后面被一起抓进来
+			var agentRaw = part.replace(/代理机构[：:]\s*/, "").split(/[\r\n]+/);
+			info.agent = agentRaw[0].trim();
+			// 如果后续行包含招标类型关键字，提取为 bidType
+			for (var j = 1; j < agentRaw.length; j++) {
+				var extra = agentRaw[j].trim();
+				if (extra && (extra.indexOf("公告") !== -1 || extra.indexOf("招标") !== -1 || extra.indexOf("磋商") !== -1 || extra.indexOf("询价") !== -1 || extra.indexOf("谈判") !== -1) && extra.length <= 12) {
+					info.bidType = info.bidType || extra;
+				}
+			}
 		} else if (part.indexOf("公告") !== -1 || part.indexOf("招标") !== -1 || part.indexOf("磋商") !== -1 || part.indexOf("询价") !== -1 || part.indexOf("谈判") !== -1) {
 			if (part.length <= 10) {
 				info.bidType = part;
