@@ -64,10 +64,7 @@ function executeCrawl(crawlOptions) {
 			return crawlAllSources(crawlSources, crawlResults, mergedKeywords, crawlOptions);
 		})
 		.then(function() {
-			return sendNotifications(crawlResults, allUsersConfig);
-		})
-		.then(function() {
-			return sendErrorNotifications(crawlResults, allUsersConfig);
+			return sendAllNotifications(crawlResults, allUsersConfig);
 		})
 		.then(function() {
 			return saveCrawlLog(crawlResults, startTime);
@@ -493,14 +490,16 @@ function batchInsert(items) {
  * 2. 对每个配置了 PushPlus token 的用户，用该用户自己的关键字再次过滤
  * 3. 只推送该用户真正关注的内容
  */
-function sendNotifications(results, userMap) {
-	var matchedItems = results._matchedNewItems || [];
-	if (matchedItems.length === 0) {
-		console.log("[Crawl] 无新增关键字命中采购信息，不推送");
-		return Promise.resolve();
-	}
-
+/**
+ * 统一推送入口，合并成功通知和错误通知为单条消息。
+ * 场景判断逻辑在 notifier.buildReport 内部执行。
+ */
+function sendAllNotifications(results, userMap) {
 	var users = Object.keys(userMap);
+	var stats = {
+		total: results.total || 0,
+		newItems: results.newItems || 0
+	};
 
 	function notifyNext(idx) {
 		if (idx >= users.length) {
@@ -515,52 +514,28 @@ function sendNotifications(results, userMap) {
 			return notifyNext(idx + 1);
 		}
 
-		var userKeywords = config["custom_keywords"];
-		var userItems = filterItemsByUserKeywords(matchedItems, userKeywords);
+		// results._matchedNewItems 由 deduplicateAndSave 在抓取阶段动态附加，
+		// 收集了命中任意用户关键字的新增条目；若无命中则不存在该字段，|| [] 兜底
+		var userItems = filterItemsByUserKeywords(
+			results._matchedNewItems || [],
+			config["custom_keywords"]
+		);
 		var blacklist = config["blacklist_keywords"];
 		userItems = filterItemsByBlacklist(userItems, blacklist);
 
-		if (userItems.length === 0) {
+		// 预检场景 4：无命中且无错误来源，跳过（notifier 内部也会做此判断，此处提前跳过避免无意义调用）
+		var hasErrors = results.sourceDetails && results.sourceDetails.some(function(s) {
+			return s.status !== "success";
+		});
+		if (userItems.length === 0 && !hasErrors) {
+			console.log("[Crawl] 用户 " + uid.substring(0, 8) + "... 无命中且无错误，跳过推送");
 			return notifyNext(idx + 1);
 		}
 
 		var uidShort = uid.length > 8 ? uid.substring(0, 8) + "..." : uid;
-		console.log("[Crawl] 向用户 " + uidShort + " 推送 " + userItems.length + " 条");
+		console.log("[Crawl] 向用户 " + uidShort + " 推送（命中 " + userItems.length + " 条，错误来源 " + (hasErrors ? ">0" : "0") + "）");
 
-		return notifier.sendNotification(token, userItems)
-			.then(function() {
-				return notifyNext(idx + 1);
-			});
-	}
-
-	return notifyNext(0);
-}
-
-function sendErrorNotifications(results, userMap) {
-	if (results.errors.length === 0) {
-		return Promise.resolve();
-	}
-
-	var users = Object.keys(userMap);
-	var stats = {
-		total: results.total,
-		newItems: results.newItems,
-		matchedItems: results.matchedItems
-	};
-
-	function notifyNext(idx) {
-		if (idx >= users.length) {
-			return Promise.resolve();
-		}
-
-		var uid = users[idx];
-		var token = userMap[uid]["pushplus_token"];
-
-		if (!token) {
-			return notifyNext(idx + 1);
-		}
-
-		return notifier.sendErrorNotification(token, results.sourceDetails, results.errors, stats)
+		return notifier.sendNotification(token, userItems, results.sourceDetails || [], stats)
 			.then(function() {
 				return notifyNext(idx + 1);
 			});
