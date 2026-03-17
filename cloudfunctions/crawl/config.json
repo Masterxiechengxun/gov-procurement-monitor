@@ -1,9 +1,4 @@
 {
-	"timeout": 900,
-	"memorySize": 1024,
-	"permissions": {
-		"openapi": []
-	},
 	"triggers": [
 		{
 			"name": "dailyTrigger",
