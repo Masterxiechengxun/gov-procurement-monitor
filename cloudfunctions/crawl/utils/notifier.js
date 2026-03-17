@@ -119,7 +119,8 @@ function buildErrorSourcesHtml(errorSources) {
 
 function buildReport(userItems, sourceDetails, stats) {
 	var now = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
-	var errorSources = sourceDetails.filter(function(s) { return s.status !== "success"; });
+	var details = sourceDetails || [];
+	var errorSources = details.filter(function(s) { return s.status !== "success"; });
 
 	// 场景 4：无命中，无错误 → 返回 null，外层跳过推送
 	if (userItems.length === 0 && errorSources.length === 0) {
