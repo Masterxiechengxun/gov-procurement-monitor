@@ -8,7 +8,7 @@
 		</view>
 		<view class="meta-fields" wx:if="{{item.buyer || item.agent || item.region}}">
 			<view class="meta-field" wx:if="{{item.buyer}}">
-				<text class="field-label">采购人</text>
+				<text class="field-label">招标人</text>
 				<text class="field-val">{{item.buyer}}</text>
 			</view>
 			<view class="meta-field" wx:if="{{item.agent}}">

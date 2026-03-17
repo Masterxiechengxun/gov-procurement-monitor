@@ -2,6 +2,6 @@
 	"usingComponents": {
 		"procurement-card": "/components/procurement-card/index"
 	},
-	"navigationBarTitleText": "采购信息",
+	"navigationBarTitleText": "招标信息",
 	"disableScroll": true
 }

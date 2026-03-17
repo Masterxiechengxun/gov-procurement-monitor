@@ -4,9 +4,9 @@ Component({
 		list: [
 			{
 				pagePath: "/pages/index/index",
-				text: "采购信息",
-				icon: "/images/tab-cart.svg",
-				activeIcon: "/images/tab-cart-active.svg"
+				text: "招标信息",
+				icon: "/images/tab-list.svg",
+				activeIcon: "/images/tab-list-active.svg"
 			},
 			{
 				pagePath: "/pages/stats/stats",

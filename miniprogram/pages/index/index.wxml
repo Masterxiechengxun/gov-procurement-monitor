@@ -7,7 +7,7 @@
 				<view class="stats-row">
 					<view class="stat-card {{currentTab === 'all' ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="all">
 						<text class="stat-val">{{stats.total}}</text>
-						<text class="stat-lbl">采购总量</text>
+						<text class="stat-lbl">招标总量</text>
 					</view>
 					<view class="stat-card stat-card-accent {{currentTab === 'today' ? 'stat-card-active' : ''}}" bindtap="onStatCardTap" data-tab="today">
 						<text class="stat-val">{{stats.todayNew}}</text>
@@ -124,7 +124,7 @@
 					<view class="empty-mag-handle"></view>
 				</view>
 			</view>
-			<text class="empty-title">暂无采购信息</text>
+			<text class="empty-title">暂无招标信息</text>
 			<text class="empty-desc">数据将在下次抓取时自动更新\n下拉页面可手动刷新</text>
 			<view class="empty-action" bindtap="onRefresherRefresh">
 				<text>立即刷新</text>

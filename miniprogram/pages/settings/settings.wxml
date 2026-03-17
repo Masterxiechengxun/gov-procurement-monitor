@@ -1,6 +1,6 @@
 <view class="page">
 
-	<!-- 采购网站列表 -->
+	<!-- 招标网站列表 -->
 	<view class="se-card anim-fade-up">
 		<view class="se-card-head">
 			<view class="se-icon-wrap se-icon-site">
@@ -11,7 +11,7 @@
 				</view>
 			</view>
 			<view>
-				<text class="se-card-title">采购网站</text>
+				<text class="se-card-title">招标网站</text>
 				<text class="se-card-desc">选择需要抓取数据的来源网站</text>
 			</view>
 		</view>
@@ -76,7 +76,7 @@
 			</view>
 			<view>
 				<text class="se-card-title">黑名单</text>
-				<text class="se-card-desc">包含以下关键字的采购信息将不会展示</text>
+				<text class="se-card-desc">包含以下关键字的招标信息将不会展示</text>
 			</view>
 		</view>
 
@@ -213,7 +213,7 @@
 			</view>
 			<view>
 				<text class="se-card-title">推送通知</text>
-				<text class="se-card-desc">自动推送新增采购信息到微信</text>
+				<text class="se-card-desc">自动推送新增招标信息到微信</text>
 			</view>
 		</view>
 		<view class="se-input-group">
@@ -256,7 +256,7 @@
 			<view class="se-storage-grid">
 				<view class="se-storage-cell">
 					<text class="se-storage-val">{{storageInfo.total}}</text>
-					<text class="se-storage-lbl">采购总数</text>
+					<text class="se-storage-lbl">招标总数</text>
 				</view>
 				<view class="se-storage-cell">
 					<text class="se-storage-val">{{storageInfo.chemical}}</text>

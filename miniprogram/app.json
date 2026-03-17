@@ -10,7 +10,7 @@
 		"backgroundColor": "#F1F5F9",
 		"backgroundTextStyle": "dark",
 		"navigationBarBackgroundColor": "#1E3A5F",
-		"navigationBarTitleText": "采购监控",
+		"navigationBarTitleText": "招标助手",
 		"navigationBarTextStyle": "white"
 	},
 	"tabBar": {
@@ -22,7 +22,7 @@
 		"list": [
 			{
 				"pagePath": "pages/index/index",
-				"text": "采购信息",
+				"text": "招标信息",
 				"iconPath": "images/tab-cart.png",
 				"selectedIconPath": "images/tab-cart-active.png"
 			},

@@ -20,7 +20,7 @@
 		<view class="st-grid">
 			<view class="st-mc anim-scale-in">
 				<text class="st-mc-val">{{overview.total}}</text>
-				<text class="st-mc-lbl">采购总量</text>
+				<text class="st-mc-lbl">招标总量</text>
 				<view class="st-mc-bar st-mc-bar-blue"></view>
 			</view>
 			<view class="st-mc anim-scale-in anim-d1">
@@ -35,9 +35,9 @@
 			</view>
 		</view>
 
-		<!-- 7天采购趋势 -->
+		<!-- 7天招标趋势 -->
 		<view class="st-section anim-fade-up">
-			<text class="st-sec-title">近7天采购趋势</text>
+			<text class="st-sec-title">近7天招标趋势</text>
 			<view class="st-bar-chart">
 				<view wx:for="{{dailyTrend}}" wx:key="date" class="st-bar-col">
 					<text class="st-bar-val">{{item.count}}</text>
@@ -108,9 +108,9 @@
 			</view>
 		</view>
 
-		<!-- 采购类型分布 -->
+		<!-- 招标类型分布 -->
 		<view wx:if="{{bidTypes.length > 0}}" class="st-section anim-fade-up anim-d4">
-			<text class="st-sec-title">采购类型分布</text>
+			<text class="st-sec-title">招标类型分布</text>
 			<view class="st-h-bars">
 				<view wx:for="{{bidTypes}}" wx:key="type" class="st-hbar-row">
 					<text class="st-hbar-name">{{item.type}}</text>
